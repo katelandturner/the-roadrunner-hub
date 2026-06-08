@@ -1619,32 +1619,48 @@ function buildClientRoadmapForWip(){var d=document.getElementById('rm-chart-clie
 
 // ── ROADMAP SNAPSHOTS ──
 var rmSnapshots = [];
+var LS_SNAP_KEY = 'rr_roadmap_snapshots_v1';
 
-function saveRoadmapSnapshot() {
-  var chart = document.getElementById('rm-chart');
-  if (!chart || !chart.innerHTML) { alert('Roadmap not built yet — try switching to the Internal tab first.'); return; }
-  var now = new Date();
-  var label = now.getDate() + ' ' + now.toLocaleString('en-GB', {month:'short'});
-  var idx = rmSnapshots.length + 1;
-  var id = 'rmsnap_' + Date.now();
-  rmSnapshots.push({id:id, label:'v'+idx+' · '+label, html:chart.innerHTML});
+function persistSnapshots() {
+  try { localStorage.setItem(LS_SNAP_KEY, JSON.stringify(rmSnapshots.map(function(s){ return {id:s.id, label:s.label, html:s.html}; }))); } catch(e) {}
+}
 
+function renderSnapshot(s) {
   // Add tab
   var tabBar = document.getElementById('rm-snapshot-tabs');
   var tab = document.createElement('div');
   tab.className = 'rm-tab';
-  tab.id = 'rmtab-'+id;
-  tab.textContent = 'v'+idx+' · '+label;
-  tab.setAttribute('onclick', "switchRmTab('"+id+"',this)");
+  tab.id = 'rmtab-'+s.id;
+  tab.textContent = s.label;
+  tab.setAttribute('onclick', "switchRmTab('"+s.id+"',this)");
   tabBar.appendChild(tab);
-
   // Add pane
   var paneContainer = document.getElementById('rm-snapshot-panes');
   var pane = document.createElement('div');
-  pane.id = 'rm-sub-'+id;
+  pane.id = 'rm-sub-'+s.id;
   pane.style.display = 'none';
-  pane.innerHTML = '<div class="card"><div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">Internal Roadmap snapshot · '+label+'<span style="font-size:11px;font-weight:400;color:var(--text-muted);">Read-only record</span></div><div style="overflow-x:auto;"><div style="min-width:1300px;padding-bottom:8px;">'+chart.innerHTML+'</div></div></div>';
+  pane.innerHTML = '<div class="card"><div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">Internal Roadmap snapshot · '+s.label+'<span style="font-size:11px;font-weight:400;color:var(--text-muted);">Read-only record</span></div><div style="overflow-x:auto;"><div style="min-width:1300px;padding-bottom:8px;">'+s.html+'</div></div></div>';
   paneContainer.appendChild(pane);
+}
+
+function loadPersistedSnapshots() {
+  try {
+    var saved = JSON.parse(localStorage.getItem(LS_SNAP_KEY) || '[]');
+    saved.forEach(function(s) { rmSnapshots.push(s); renderSnapshot(s); });
+  } catch(e) {}
+}
+
+function saveRoadmapSnapshot() {
+  var chart = document.getElementById('rm-chart');
+  if (!chart || !chart.innerHTML) { alert('Roadmap not built yet — try switching to the Current tab first.'); return; }
+  var now = new Date();
+  var label = now.getDate() + ' ' + now.toLocaleString('en-GB', {month:'short'});
+  var idx = rmSnapshots.length + 1;
+  var id = 'rmsnap_' + Date.now();
+  var s = {id:id, label:'v'+idx+' · '+label, html:chart.innerHTML};
+  rmSnapshots.push(s);
+  renderSnapshot(s);
+  persistSnapshots();
 }
 
 // ── ROADMAP SUB-TABS ──
@@ -1693,6 +1709,7 @@ function hideRmTip() {
 
 updateCountdowns();
 buildRoadmap();
+loadPersistedSnapshots();
 loadDevTasks();
 loadChecks();
 loadSlack();
