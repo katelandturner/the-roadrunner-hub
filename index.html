@@ -29,7 +29,8 @@
   --font: 'Inter', system-ui, -apple-system, sans-serif;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: var(--font); background: #fff; color: var(--text); font-size: 14px; height: 100vh; overflow: hidden; }
+body { font-family: var(--font); background: #f1f1f1; color: var(--text); font-size: 14px; height: 100vh; overflow: hidden; display:flex; justify-content:center; }
+  #app-shell { width:100%; max-width:1500px; background:#fff; display:flex; flex-direction:column; height:100vh; overflow:hidden; box-shadow:0 0 40px rgba(0,0,0,0.08); }
 
 .hdr {
   display: flex; align-items: center; gap: 12px;
@@ -359,7 +360,7 @@ body { font-family: var(--font); background: #fff; color: var(--text); font-size
 </style>
 </head>
 <body>
-
+<div id="app-shell">
 <div class="hdr">
   <div class="hdr-logo">The RoadRunner Hub</div>
   <div class="badge badge-blue" id="phase-badge">Build · Phase 1</div>
@@ -1707,5 +1708,6 @@ loadDevTasks();
 loadChecks();
 loadSlack();
 </script>
+</div>
 </body>
 </html>
