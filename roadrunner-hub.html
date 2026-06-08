@@ -1,0 +1,1711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The RoadRunner Hub</title>
+<style>
+:root {
+  color-scheme: light;
+  --blue: #2563EB;
+  --blue-light: #EFF6FF;
+  --blue-border: #BFDBFE;
+  --amber: #D97706;
+  --amber-light: #FFFBEB;
+  --amber-border: #FDE68A;
+  --purple: #7C3AED;
+  --purple-light: #F5F3FF;
+  --purple-border: #DDD6FE;
+  --green: #059669;
+  --green-light: #ECFDF5;
+  --red: #DC2626;
+  --red-light: #FEF2F2;
+  --red-border: #FECACA;
+  --gray: #6B7280;
+  --gray-light: #F9FAFB;
+  --border: #E5E7EB;
+  --text: #111827;
+  --text-muted: #6B7280;
+  --font: 'Inter', system-ui, -apple-system, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: #fff; color: var(--text); font-size: 14px; height: 100vh; overflow: hidden; }
+
+.hdr {
+  display: flex; align-items: center; gap: 12px;
+  padding: 0 20px; height: 50px;
+  border-bottom: 1px solid var(--border);
+  background: #fff; position: sticky; top: 0; z-index: 100;
+}
+.hdr-logo { font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
+.hdr-sep { color: var(--border); font-size: 18px; }
+.hdr-client { font-size: 13px; color: var(--text-muted); }
+.badge {
+  display: inline-flex; align-items: center;
+  padding: 3px 9px; border-radius: 5px;
+  font-size: 12px; font-weight: 500;
+  border: 1px solid var(--border); background: var(--gray-light);
+}
+.badge-blue { background: var(--blue-light); border-color: var(--blue-border); color: var(--blue); }
+.badge-orange { background: #FFF7ED; border-color: #FED7AA; color: #C2410C; font-weight: 600; }
+.badge-green { background: var(--green-light); border-color: #6EE7B7; color: #065F46; font-weight: 600; }
+.hdr-spacer { flex: 1; }
+.hdr-refresh { background: none; border: 1px solid var(--border); border-radius: 5px; padding: 4px 8px; font-size: 12px; cursor: pointer; color: var(--text-muted); }
+.hdr-refresh:hover { background: var(--gray-light); }
+
+.layout { display: flex; height: calc(100vh - 50px); }
+
+.sidebar {
+  width: 220px; flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  background: #FAFAFA;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.sb-section { padding: 12px; }
+.sb-section + .sb-section { border-top: 1px solid var(--border); }
+.sb-label {
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--text-muted); margin-bottom: 8px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.sb-refresh-btn {
+  background: none; border: none; cursor: pointer;
+  color: var(--text-muted); font-size: 13px; line-height: 1;
+  padding: 1px 3px; border-radius: 3px;
+}
+.sb-refresh-btn:hover { background: var(--border); }
+.slack-feed { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; flex: 1; }
+.slack-msg {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: 6px; padding: 7px 9px; font-size: 11px;
+  display: flex; gap: 8px; align-items: flex-start; flex-shrink: 0;
+}
+.slack-avatar {
+  width: 26px; height: 26px; border-radius: 5px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; color: #fff; flex-shrink: 0;
+  text-transform: uppercase;
+}
+.slack-body { flex: 1; min-width: 0; }
+.slack-author { font-weight: 600; margin-bottom: 2px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.slack-text { color: var(--text); line-height: 1.45; word-break: break-word; }
+.slack-time { color: var(--text-muted); font-size: 10px; margin-top: 2px; }
+.slack-empty { font-size: 11px; color: var(--text-muted); text-align: center; padding: 12px 0; }
+
+.sb-links { display: flex; flex-direction: column; gap: 2px; }
+.sb-link {
+  display: flex; align-items: center; gap: 7px;
+  padding: 5px 7px; border-radius: 5px;
+  font-size: 12px; color: var(--text);
+  text-decoration: none; cursor: pointer;
+}
+.sb-link:hover { background: var(--border); }
+.sb-link-disabled { color: var(--text-muted) !important; cursor: default !important; }
+.sb-link-disabled:hover { background: none !important; }
+.sb-chip {
+  margin-left: auto; font-size: 10px;
+  background: var(--gray-light); border: 1px solid var(--border);
+  border-radius: 3px; padding: 1px 5px; color: var(--text-muted);
+}
+
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+.tabs {
+  display: flex; padding: 0 20px;
+  border-bottom: 1px solid var(--border);
+  background: #fff; flex-shrink: 0;
+}
+.tab {
+  padding: 10px 13px; font-size: 13px; font-weight: 500;
+  color: var(--text-muted); cursor: pointer;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  white-space: nowrap;
+}
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--text); border-bottom-color: var(--text); }
+
+.tab-content { flex: 1; overflow-y: auto; padding: 20px; }
+.pane { display: none; }
+.pane.active { display: block; }
+
+.card {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: 8px; padding: 16px; margin-bottom: 16px;
+}
+.card-title {
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.07em;
+  color: var(--text-muted); margin-bottom: 12px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.pill {
+  display: inline-flex; align-items: center;
+  padding: 2px 7px; border-radius: 4px;
+  font-size: 11px; font-weight: 600; white-space: nowrap;
+}
+.p-dev { background: var(--blue-light); color: var(--blue); }
+.p-prod { background: var(--amber-light); color: var(--amber); }
+.p-design { background: var(--purple-light); color: var(--purple); }
+.p-blocked { background: var(--red-light); color: var(--red); }
+.p-progress { background: #DBEAFE; color: #1D4ED8; }
+.p-action { background: #FEF9C3; color: #713F12; border: 1.5px solid #FACC15; }
+.p-done { background: var(--green-light); color: var(--green); }
+.p-gray { background: var(--gray-light); color: var(--gray); }
+.p-risk { background: #FFFBEB; color: #92400E; border: 1px solid var(--amber-border); }
+
+.ttable { width: 100%; border-collapse: collapse; }
+.ttable th {
+  text-align: left; font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--text-muted); padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.ttable td {
+  padding: 9px 10px; border-bottom: 1px solid var(--border);
+  font-size: 13px; vertical-align: middle;
+}
+.ttable tr:last-child td { border-bottom: none; }
+.ttable tr:hover td { background: var(--gray-light); }
+.tr-blocked td { background: #FEF2F2 !important; }
+
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.g4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+
+.goal-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 0; border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.goal-item:last-child { border-bottom: none; }
+.goal-item input { width: 15px; height: 15px; cursor: pointer; flex-shrink: 0; }
+.goal-item.done span { text-decoration: line-through; color: var(--text-muted); }
+.prog-wrap { background: var(--gray-light); border-radius: 99px; height: 5px; margin-top: 10px; }
+.prog-fill { background: var(--blue); height: 100%; border-radius: 99px; transition: width .3s; }
+.prog-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+.checklist { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+.checklist li { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.checklist li input { width: 14px; height: 14px; cursor: pointer; }
+
+.ds-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 12px;
+}
+.ds-row:last-child { border-bottom: none; }
+.dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.dot-green { background: var(--green); }
+.dot-gray { background: #D1D5DB; }
+.dot-amber { background: var(--amber); }
+.ds-name { font-weight: 500; width: 76px; }
+.ds-ts { color: var(--text-muted); font-size: 11px; margin-left: auto; }
+
+.connect-banner {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; margin-bottom: 12px;
+  background: var(--blue-light); border: 1px solid var(--blue-border);
+  border-radius: 6px; font-size: 12px; color: #1D4ED8;
+}
+
+.rm-wrap { overflow-x: auto; }
+.rm-inner { min-width: 780px; }
+.rm-months {
+  display: flex; margin-left: 150px; margin-bottom: 6px;
+}
+.rm-month {
+  flex: 1; text-align: center; font-size: 11px;
+  font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--text-muted);
+}
+.rm-lane { display: flex; align-items: flex-start; margin-bottom: 10px; }
+.rm-lane-label {
+  width: 150px; flex-shrink: 0; padding-right: 12px; padding-top: 7px;
+}
+.rm-lane-title { font-size: 12px; font-weight: 600; }
+.rm-lane-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+.rm-bars { flex: 1; position: relative; }
+.bar {
+  position: absolute; height: 26px; border-radius: 5px;
+  display: flex; align-items: center; padding: 0 7px;
+  font-size: 11px; font-weight: 500; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.bar-dev { background: var(--blue); color: #fff; }
+.bar-prod { background: var(--amber); color: #fff; }
+.bar-done { background: #10B981; color: #fff; }
+.bar-risk {
+  background: #FFFBEB; border: 2px solid #F59E0B;
+  color: #92400E;
+}
+.bar-gray { background: #D1D5DB; color: var(--text); }
+
+.ws-col {
+  background: var(--gray-light); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px; min-height: 420px;
+  display: flex; flex-direction: column;
+}
+.ws-col-hdr { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+.ws-col-title { font-size: 13px; font-weight: 700; margin-top: 4px; }
+.ws-col-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.ws-group { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin: 10px 0 5px; }
+.ws-cards { display: flex; flex-direction: column; gap: 7px; }
+.wsc {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: 6px; padding: 9px 11px;
+}
+.wsc-name { font-size: 12px; font-weight: 500; margin-bottom: 4px; }
+.wsc-meta { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.wsc-sub { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+.ws-placeholder {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 16px 8px; color: var(--text-muted); font-size: 12px;
+}
+
+.sec-title {
+  font-size: 14px; font-weight: 700; margin-bottom: 12px;
+  padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.contact-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+.contact-card {
+  background: var(--gray-light); border: 1px solid var(--border);
+  border-radius: 7px; padding: 11px;
+}
+.cc-name { font-weight: 600; font-size: 13px; }
+.cc-role { font-size: 12px; color: var(--text-muted); margin: 2px 0; }
+.cc-detail { font-size: 12px; color: var(--text-muted); }
+.agr-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+.agr-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 10px 13px; background: var(--gray-light);
+  border: 1px solid var(--border); border-radius: 6px;
+}
+.agr-body { flex: 1; }
+.agr-name { font-size: 13px; font-weight: 500; }
+.agr-notes { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.comms-list { display: flex; flex-direction: column; gap: 8px; }
+.comms-entry {
+  display: flex; gap: 12px; padding: 10px 13px;
+  background: #fff; border: 1px solid var(--border); border-radius: 6px;
+}
+.comms-date { font-size: 12px; font-weight: 600; color: var(--text-muted); width: 90px; flex-shrink: 0; }
+.comms-body { flex: 1; }
+.comms-format { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 2px; }
+.comms-summary { font-size: 13px; }
+.comms-next { font-size: 12px; color: var(--blue); margin-top: 3px; }
+
+.brief-sec { margin-bottom: 24px; }
+.brief-title { font-size: 15px; font-weight: 700; margin-bottom: 10px; }
+.brief-body { font-size: 13px; line-height: 1.7; }
+.brief-body p { margin-bottom: 8px; }
+
+[contenteditable] { outline: none; cursor: text; border-radius: 3px; }
+[contenteditable]:hover { background: #F8FAFC; }
+[contenteditable]:focus { background: #EFF6FF; padding: 1px 3px; }
+.edit-hint {
+  font-size: 11px; color: var(--text-muted);
+  margin-bottom: 12px; display: flex; align-items: center; gap: 5px;
+}
+
+.small-btn {
+  font-size: 11px; padding: 3px 9px;
+  border: 1px solid var(--border); border-radius: 5px;
+  background: #fff; cursor: pointer; color: var(--text);
+}
+.small-btn:hover { background: var(--gray-light); }
+.no-update {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 12px; background: #FFFBEB;
+  border: 1px solid var(--amber-border); border-radius: 6px;
+  font-size: 12px; color: #92400E; margin-top: 8px;
+}
+
+  
+  input[type="checkbox"] {
+    appearance: none; -webkit-appearance: none;
+    width: 17px; height: 17px; flex-shrink: 0;
+    border: 2px solid #D1D5DB; border-radius: 4px;
+    cursor: pointer; position: relative;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  input[type="checkbox"]:checked {
+    background: #059669; border-color: #059669;
+  }
+  input[type="checkbox"]:checked::after {
+    content: '✓'; color: white; font-size: 11px; font-weight: 700;
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  input[type="checkbox"]:hover { border-color: #059669; }
+
+  
+  .rm-tab { padding:8px 14px; font-size:12px; font-weight:500; color:var(--text-muted); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; }
+  .rm-tab:hover { color:var(--text); }
+  .rm-tab.rm-active { color:var(--text); border-bottom-color:var(--text); font-weight:600; }
+
+          .ws-cards .wsc { cursor:pointer; position:relative; transition:box-shadow 0.15s, transform 0.1s; }
+          .ws-cards .wsc:hover { box-shadow:0 2px 8px rgba(0,0,0,0.08); transform:translateY(-1px); }
+          .ws-cards .wsc::after { content:'→'; position:absolute; top:8px; right:10px; font-size:11px; color:#D1D5DB; transition:color 0.15s; pointer-events:none; }
+          .ws-cards .wsc:hover::after { color:#93C5FD; }
+          
+          .wsc-dev  { background:linear-gradient(to right, #2563EB 4px, var(--gray-light) 4px); padding:10px 12px 10px 14px; }
+          .wsc-prod { background:linear-gradient(to right, #D97706 4px, var(--gray-light) 4px); padding:10px 12px 10px 14px; }
+          .wsc-des  { background:linear-gradient(to right, #7C3AED 4px, var(--gray-light) 4px); padding:10px 12px 10px 14px; }
+          .ws-ph { padding-bottom:10px; }
+          .ws-ph:not(:first-child) { padding-top:2px; }
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-logo">The RoadRunner Hub</div>
+  <div class="badge badge-blue" id="phase-badge">Build · Phase 1</div>
+  <div class="badge badge-orange" id="phase-end-badge">Phase ends in — days</div>
+  <div class="badge badge-green" id="pilot-badge">✈ — days to pilot</div>
+  <div class="hdr-spacer"></div>
+  <button class="hdr-refresh" onclick="loadSlack()">↻ Refresh</button>
+</div>
+
+<div class="layout">
+
+  
+  <div class="sidebar" style="display:none;">
+    <div class="sb-section" style="flex:1; overflow:hidden; display:flex; flex-direction:column;">
+      <div class="sb-label">
+        #mp_roadrunner
+        <button class="sb-refresh-btn" onclick="loadSlack()" title="Refresh">↻</button>
+      </div>
+      <div class="slack-feed" id="slack-feed">
+        <div class="slack-empty">Loading…</div>
+      </div>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Quick Links</div>
+      <div class="sb-links">
+        <a class="sb-link" href="https://docs.google.com/document/d/14Fws-vIRifmTb_9R0KvI9Gq5z7rgNuhnFxu1XG31SpE/edit" target="_blank">
+          📄 MP Technical Brief
+        </a>
+        <a class="sb-link sb-link-disabled">
+          🗂 Miro Atlas Flows <span class="sb-chip">TBC</span>
+        </a>
+        <a class="sb-link sb-link-disabled">
+          ✓ ClickUp Board <span class="sb-chip">Connect</span>
+        </a>
+        <a class="sb-link sb-link-disabled">
+          ⌥ Code Repo <span class="sb-chip">TBC</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="main">
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('briefing',this)">Onboarding</div>
+      <div class="tab" onclick="switchTab('roadmap',this)">Roadmap</div>
+      <div class="tab" onclick="switchTab('workstreams',this)">Workstreams</div>
+      <div class="tab" onclick="switchTab('clientview',this)">High-level Timings</div>
+      <div class="tab" onclick="switchTab('client',this)" style="color:var(--text-muted);font-style:italic;">Client · WIP</div>
+      <div class="tab" onclick="switchTab('time',this)" style="color:var(--text-muted);font-style:italic;">Time · WIP</div>
+      <div class="tab" onclick="switchTab('today',this)" style="color:var(--text-muted);font-style:italic;">Today · WIP</div>
+    </div>
+
+    <div class="tab-content">
+
+      
+      <div class="pane" id="pane-today" data-default-inactive="true">
+
+        
+        <div class="card">
+          <div class="card-title">Today's State</div>
+          <div class="connect-banner">⚡ ClickUp not connected — showing placeholder Dev tasks</div>
+          <table class="ttable">
+            <thead>
+              <tr>
+                <th>Workstream</th>
+                <th>Task</th>
+                <th>Owner</th>
+                <th>Status</th>
+                <th>Source</th>
+              </tr>
+            </thead>
+            <tbody id="today-tbody">
+              
+              <tr class="tr-blocked">
+                <td><span class="pill p-prod">Production</span></td>
+                <td>manifest.json script — blocked on LucidLink folder config</td>
+                <td>Guillaume</td>
+                <td><span class="pill p-blocked">Blocked</span></td>
+                <td style="font-size:12px;color:var(--text-muted);">Slack · 30 May</td>
+              </tr>
+              <tr>
+                <td><span class="pill p-dev">Dev</span></td>
+                <td>Phase 1 · Auth + Data Layer</td>
+                <td>Athlon</td>
+                <td><span class="pill p-progress">In Progress</span></td>
+                <td style="font-size:12px;color:var(--text-muted);">ClickUp · placeholder</td>
+              </tr>
+              <tr>
+                <td><span class="pill p-dev">Dev</span></td>
+                <td>Phase 1 · API Scaffolding</td>
+                <td>Athlon</td>
+                <td><span class="pill p-progress">In Progress</span></td>
+                <td style="font-size:12px;color:var(--text-muted);">ClickUp · placeholder</td>
+              </tr>
+              <tr>
+                <td><span class="pill p-prod">Production</span></td>
+                <td>LucidLink folder integration</td>
+                <td>Guillaume + Muyiwa</td>
+                <td><span class="pill p-progress">In Progress</span></td>
+                <td style="font-size:12px;color:var(--text-muted);">Slack · 30 May</td>
+              </tr>
+              <tr id="design-row">
+                <td><span class="pill p-design">Design</span></td>
+                <td id="design-task">Muyiwa knowledge dump — AE plugin spec</td>
+                <td>Muyiwa</td>
+                <td><span class="pill p-progress">In Progress</span></td>
+                <td style="font-size:12px;color:var(--text-muted);">Manual</td>
+              </tr>
+            </tbody>
+          </table>
+          <div id="no-update-area"></div>
+        </div>
+
+        
+        <div class="g2">
+          
+          <div class="card" style="margin-bottom:0;">
+            <div class="card-title">
+              This Week's Goal
+              <span id="week-pct" style="font-size:12px;color:var(--text-muted);font-weight:500;text-transform:none;letter-spacing:0;">0% complete</span>
+            </div>
+            <div id="goal-list">
+              <div class="goal-item"><input type="checkbox" onchange="updatePct()"><span>Kick off session complete</span></div>
+              <div class="goal-item"><input type="checkbox" onchange="updatePct()"><span>Session booked with Rob — product deep dive</span></div>
+              <div class="goal-item"><input type="checkbox" onchange="updatePct()"><span>Session booked with G — production workflow</span></div>
+              <div class="goal-item"><input type="checkbox" onchange="updatePct()"><span><span class="pill p-design" style="margin-right:5px;">Design</span>Muyiwa briefed</span></div>
+              <div class="goal-item"><input type="checkbox" onchange="updatePct()"><span><span class="pill p-dev" style="margin-right:5px;">Dev</span>ClickUp set up + task naming aligned</span></div>
+              <div class="goal-item"><input type="checkbox" onchange="updatePct()"><span>Notion set up for G</span></div>
+              <div class="goal-item"><input type="checkbox" onchange="updatePct()"><span>Designer requirement timings established</span></div>
+              <div class="goal-item"><input type="checkbox" onchange="updatePct()"><span>Weekly internal status cadence set up</span></div>
+            </div>
+            <div class="prog-wrap"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+            <div class="prog-label" id="prog-label">0 of 8 items complete</div>
+          </div>
+
+          
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div class="card" style="flex:1;margin-bottom:0;">
+              <div class="card-title">Next Standup Agenda</div>
+              <div class="edit-hint">✏ Click to edit</div>
+              <ul class="checklist" contenteditable="true">
+                <li>· Review blockers — manifest.json, LucidLink</li>
+                <li>· Phase 1 progress vs 23 June milestone</li>
+                <li>· Muyiwa knowledge dump status</li>
+                <li>· Designer resource — update</li>
+                <li>· Any client comms needed this week</li>
+              </ul>
+            </div>
+            <div class="card" style="flex:1;margin-bottom:0;">
+              <div class="card-title">Next Client Status Agenda</div>
+              <div class="edit-hint">✏ Click to edit</div>
+              <ul class="checklist" contenteditable="true">
+                <li>· Phase 1 summary + Phase 2 preview</li>
+                <li>· Pilot date confirmation — 11 Aug</li>
+                <li>· Feedback window process — agree</li>
+                <li>· Test content sign-off status</li>
+                <li>· Open questions from Amazon team</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        
+        <div class="card" style="margin-top:16px;">
+          <div class="card-title">Daily Checklist</div>
+          <div class="g2">
+            <div>
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:8px;">Live Data Status</div>
+              <div class="ds-row">
+                <div class="dot dot-green" id="slack-dot"></div>
+                <div class="ds-name">Slack feed</div>
+                <span id="slack-status" style="font-size:12px;color:var(--green);">Loading…</span>
+                <span class="ds-ts" id="slack-ts">—</span>
+              </div>
+              <div class="ds-row">
+                <div class="dot dot-gray"></div>
+                <div class="ds-name">ClickUp</div>
+                <span style="font-size:12px;color:var(--text-muted);">Not connected</span>
+                <span class="ds-ts">—</span>
+              </div>
+              <div class="ds-row">
+                <div class="dot dot-gray"></div>
+                <div class="ds-name">Notion</div>
+                <span style="font-size:12px;color:var(--text-muted);">Not connected</span>
+                <span class="ds-ts">—</span>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:8px;">Needs Your Input Today</div>
+              <ul class="checklist">
+                <li><input type="checkbox" id="c1" onchange="saveChecks()"><label for="c1">Weekly goal current?</label></li>
+                <li><input type="checkbox" id="c2" onchange="saveChecks()"><label for="c2">Dev slate accurate?</label></li>
+                <li><input type="checkbox" id="c3" onchange="saveChecks()"><label for="c3">Any new blockers?</label></li>
+                <li><input type="checkbox" id="c4" onchange="saveChecks()"><label for="c4">Roadmap dates changed?</label></li>
+                <li><input type="checkbox" id="c5" onchange="saveChecks()"><label for="c5">New actuals to log in costs?</label></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="pane" id="pane-roadmap">
+
+        
+        <div style="display:flex;align-items:center;border-bottom:1px solid var(--border);margin-bottom:16px;">
+          <div class="rm-tab rm-active" id="rmtab-internal" onclick="switchRmTab('internal',this)">Internal</div>
+          <div id="rm-snapshot-tabs" style="display:flex;"></div>
+          <div style="margin-left:auto;padding-right:4px;">
+            <button onclick="saveRoadmapSnapshot()" style="font-size:11px;padding:3px 10px;border:1px solid var(--border);border-radius:5px;background:#F9FAFB;cursor:pointer;color:var(--text-muted);" title="Save a dated snapshot of the current Internal roadmap">📸 Save snapshot</button>
+          </div>
+        </div>
+        <div id="rm-snapshot-panes"></div>
+
+        
+        <div id="rm-sub-internal">
+          <div class="card">
+            <div class="card-title">Project Roadmap · May – August 2026</div>
+            <div style="overflow-x:auto;">
+              <div id="rm-chart" style="min-width:1300px; padding-bottom:8px;"></div>
+            </div>
+            <div style="display:flex;gap:16px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted);"><div style="width:14px;height:9px;background:#2563EB;border-radius:2px;"></div>Dev</div>
+              <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted);"><div style="width:14px;height:9px;background:#D97706;border-radius:2px;"></div>Production</div>
+              <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted);"><div style="width:14px;height:9px;background:#7C3AED;border-radius:2px;"></div>Design</div>
+              <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted);"><div style="width:14px;height:9px;background:#059669;border-radius:2px;"></div>Client</div>
+              <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted);"><div style="width:14px;height:9px;background:#FEFCE8;border:2px solid #FACC15;border-radius:2px;"></div>Risk / TBC</div>
+              <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted);"><div style="width:14px;height:9px;background:#4B5563;border-radius:2px;"></div>Past</div>
+              <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted);"><div style="width:18px;height:2px;border-top:2px dashed #DC2626;"></div>Pilot</div>
+            </div>
+          </div>
+        </div>
+
+            <div style="display:flex;gap:16px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted);"><div style="width:14px;height:9px;background:#2563EB;border-radius:2px;opacity:0.5;"></div>Development</div>
+              <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted);"><div style="width:14px;height:9px;background:#059669;border-radius:2px;"></div>Client</div>
+              <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted);"><div style="width:14px;height:9px;background:#FEFCE8;border:2px solid #FACC15;border-radius:2px;"></div>TBC</div>
+              <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted);"><div style="width:18px;height:2px;border-top:2px dashed #DC2626;"></div>Pilot</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      
+      <div class="pane" id="pane-workstreams">
+        
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0 24px;align-items:stretch;">
+        
+        
+
+          
+          <div class="wsc-dev" style="border-bottom:1px solid var(--border); padding-top:12px; padding-bottom:10px; margin-bottom:0;">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+              <div>
+                <div style="font-size:16px;font-weight:800;color:#2563EB;letter-spacing:-0.3px;">Dev</div>
+                <div style="font-size:12px;color:var(--text-muted);margin-top:2px;font-weight:500;">Sofia</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">
+                <span contenteditable="true" style="font-size:12px;font-weight:700;background:#EFF6FF;color:#2563EB;border:1.5px solid #BFDBFE;border-radius:99px;padding:2px 9px;cursor:text;" title="Click to edit">25%</span>
+                <span contenteditable="true" style="font-size:11px;font-weight:600;background:#ECFDF5;color:#065F46;border:1.5px solid #6EE7B7;border-radius:99px;padding:2px 9px;cursor:text;" title="Click to edit">On Track</span>
+              </div>
+            </div>
+          </div>
+          <div class="wsc-prod" style="border-bottom:1px solid var(--border); padding-top:12px; padding-bottom:10px; margin-bottom:0;">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+              <div>
+                <div style="font-size:16px;font-weight:800;color:#D97706;letter-spacing:-0.3px;">Production</div>
+                <div style="font-size:12px;color:var(--text-muted);margin-top:2px;font-weight:500;">Guillaume · Muyiwa</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">
+                <span contenteditable="true" style="font-size:12px;font-weight:700;background:#EFF6FF;color:#2563EB;border:1.5px solid #BFDBFE;border-radius:99px;padding:2px 9px;cursor:text;" title="Click to edit">10%</span>
+                <span contenteditable="true" style="font-size:11px;font-weight:600;background:#FEFCE8;color:#713F12;border:1.5px solid #FACC15;border-radius:99px;padding:2px 9px;cursor:text;" title="Click to edit">At Risk</span>
+              </div>
+            </div>
+          </div>
+          <div class="wsc-des" style="border-bottom:1px solid var(--border); padding-top:12px; padding-bottom:10px; margin-bottom:0;">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+              <div>
+                <div style="font-size:16px;font-weight:800;color:#7C3AED;letter-spacing:-0.3px;">Design</div>
+                <div style="font-size:12px;color:var(--text-muted);margin-top:2px;font-weight:500;">TBC designer</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">
+                <span contenteditable="true" style="font-size:12px;font-weight:700;background:#EFF6FF;color:#2563EB;border:1.5px solid #BFDBFE;border-radius:99px;padding:2px 9px;cursor:text;" title="Click to edit">0%</span>
+                <span contenteditable="true" style="font-size:11px;font-weight:600;background:#FEF2F2;color:#DC2626;border:1.5px solid #FECACA;border-radius:99px;padding:2px 9px;cursor:text;" title="Click to edit">Blocked</span>
+              </div>
+            </div>
+          </div>
+
+          
+          <div class="wsc-dev" style="padding-top:12px; padding-bottom:12px;">
+            <div style="padding:10px 12px;background:#FEFCE8;border:2px solid #FACC15;border-radius:7px;margin-bottom:8px;">
+              <div style="font-size:12px;font-weight:700;color:#713F12;margin-bottom:2px;color:#713F12;">⚡ Connect ClickUp</div>
+              <div style="font-size:11px;color:#713F12;line-height:1.4;">Live task data will feed directly into this workstream once connected.</div>
+            </div>
+            <div style="padding:10px 12px;background:#FEFCE8;border:2px solid #FACC15;border-radius:7px;">
+              <div style="font-size:12px;font-weight:700;color:#713F12;margin-bottom:2px;">🤝 Define Epics, Features and Tasks collaboratively</div>
+              <div style="font-size:11px;color:#713F12;line-height:1.4;">Align and agree on each and reflect in ClickUp and on this hub.</div>
+            </div>
+          </div>
+          <div class="wsc-prod" style="padding-top:12px; padding-bottom:12px;">
+            <div style="padding:10px 12px;background:#FEFCE8;border:2px solid #FACC15;border-radius:7px;">
+              <div style="font-size:12px;font-weight:700;color:#713F12;margin-bottom:2px;">📋 Connect Notion</div>
+              <div style="font-size:11px;color:#713F12;line-height:1.4;">Live task data will feed directly into this workstream once connected.</div>
+            </div>
+          </div>
+          <div class="wsc-des" style="padding-top:12px; padding-bottom:12px;">
+            <div style="padding:10px 12px;background:#FEFCE8;border:2px solid #FACC15;border-radius:7px;">
+              <div style="font-size:12px;font-weight:700;color:#713F12;margin-bottom:2px;">⚠ Designer resourcing</div>
+              <div style="font-size:11px;color:#713F12;line-height:1.4;">Both workstreams starting w/c 29 Jun — resourcing must be confirmed before this date.</div>
+            </div>
+          </div>
+
+          
+          <div class="wsc-dev" style="padding-top:8px; padding-bottom:8px;">
+            <div class="ws-group" style="margin-top:0;">Phase 0 · Onboarding</div>
+            <div class="ws-cards">
+              <div class="wsc" style="background:#F9FAFB;">
+                <div class="wsc-name" style="color:var(--text-muted);">Onboarding complete</div>
+                <div class="wsc-meta"><span class="pill" style="background:#4B5563;color:#E5E7EB;font-size:11px;font-weight:600;padding:2px 7px;border-radius:4px;">Complete</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="wsc-prod" style="padding-top:8px; padding-bottom:8px;">
+            <div class="ws-group" style="margin-top:0;">Phase 0 · Onboarding</div>
+            <div class="ws-cards">
+              <div class="wsc" style="background:#F9FAFB;opacity:.6;">
+                <div class="wsc-name" style="color:var(--text-muted);">Not applicable</div>
+              </div>
+            </div>
+          </div>
+          <div class="wsc-des" style="padding-top:8px; padding-bottom:8px;">
+            <div class="ws-group" style="margin-top:0;">Phase 0 · Onboarding</div>
+            <div class="ws-cards">
+              <div class="wsc" style="background:#F9FAFB;opacity:.6;">
+                <div class="wsc-name" style="color:var(--text-muted);">Not applicable</div>
+              </div>
+            </div>
+          </div>
+
+          
+          <div class="wsc-dev" style="padding-top:8px; padding-bottom:8px;">
+            <div class="ws-group" style="margin-top:0;">Phase 1 · Foundations <span style="font-weight:400;color:var(--text-muted);">Jun 1 → Jun 29</span></div>
+            <div id="clickup-phase1-tasks" class="ws-cards">
+              <div style="font-size:12px;color:var(--text-muted);padding:10px;text-align:center;">Loading from ClickUp…</div>
+            </div>
+            <div style="padding:9px 11px;background:#ECFDF5;border:1.5px solid #6EE7B7;border-radius:6px;margin-top:10px;">
+              <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#065F46;margin-bottom:3px;">🏆 Phase 1 Goal</div>
+              <div style="font-size:12px;font-weight:600;color:#065F46;">Well tested version of the product</div>
+            </div>
+          </div>
+          <div class="wsc-prod" style="padding-top:8px; padding-bottom:8px;">
+            <div class="ws-group" style="margin-top:0;">Phase 1 · Foundations <span style="font-weight:400;color:var(--text-muted);">Jun 1 → Jun 29</span></div>
+            <div class="ws-cards">
+              <div class="wsc"><div class="wsc-name">Muyiwa · knowledge dump</div><div class="wsc-meta"><span class="pill" style="background:#FEFCE8;color:#713F12;border:1.5px solid #FACC15;">Awaiting briefing</span></div><div class="wsc-sub">w/c 1 Jun + w/c 8 Jun</div></div>
+              <div class="wsc" style="border-left:3px solid #FACC15;"><div class="wsc-name">⚠ manifest.json script</div><div class="wsc-meta"><span class="pill p-action">TBC</span></div><div class="wsc-sub">w/c 15 Jun</div></div>
+              <div class="wsc"><div class="wsc-name">LucidLink integration</div><div class="wsc-meta"><span class="pill p-gray">Pending</span></div><div class="wsc-sub">w/c 15 Jun</div></div>
+              <div class="wsc"><div class="wsc-name">AE Transloc script</div><div class="wsc-meta"><span class="pill p-gray">Pending</span></div><div class="wsc-sub">w/c 22 Jun · ~10 days</div></div>
+            </div>
+          </div>
+          <div class="wsc-des" style="padding-top:8px; padding-bottom:8px;">
+            <div class="ws-group" style="margin-top:0;">Phase 1 · Foundations <span style="font-weight:400;color:var(--text-muted);">Jun 1 → Jun 29</span></div>
+            <div class="ws-cards">
+              <div class="wsc" style="background:#F9FAFB;opacity:.6;"><div class="wsc-name" style="color:var(--text-muted);">Not applicable</div></div>
+            </div>
+          </div>
+
+          
+          <div class="wsc-dev" style="padding-top:8px; padding-bottom:8px;">
+            <div class="ws-group" style="margin-top:0;">Phase 2 · Feature Dev <span style="font-weight:400;color:var(--text-muted);">Jun 29 → Jul 27</span></div>
+            <div class="ws-cards">
+              <div class="wsc" style="opacity:.7;"><div class="wsc-name">Integrate AI / AWS services</div><div class="wsc-meta"><span class="pill p-gray">Not started</span></div><div class="wsc-sub">Could pull into Phase 1</div></div>
+              <div class="wsc" style="opacity:.7;"><div class="wsc-name">Connect all data points to persistent storage (DB)</div><div class="wsc-meta"><span class="pill p-gray">Not started</span></div></div>
+              <div class="wsc" style="opacity:.7;"><div class="wsc-name">Enhancement / modification of user journeys</div><div class="wsc-meta"><span class="pill p-gray">Not started</span></div></div>
+              <div class="wsc" style="opacity:.7;"><div class="wsc-name">Bugfixes and improvements</div><div class="wsc-meta"><span class="pill p-gray">Not started</span></div></div>
+            </div>
+          </div>
+          <div class="wsc-prod" style="padding-top:8px; padding-bottom:8px;">
+            <div class="ws-group" style="margin-top:0;">Phase 2 · Feature Dev <span style="font-weight:400;color:var(--text-muted);">Jun 29 → Jul 27</span></div>
+            <div class="ws-cards">
+              <div class="wsc" style="opacity:.7;"><div class="wsc-name">Captioning + Audio</div><div class="wsc-meta"><span class="pill p-gray">Pending</span></div><div class="wsc-sub">Scope TBC</div></div>
+              <div class="wsc" style="opacity:.7;"><div class="wsc-name">AE Transloc iteration</div><div class="wsc-meta"><span class="pill p-gray">Pending</span></div></div>
+            </div>
+          </div>
+          <div class="wsc-des" style="padding-top:8px; padding-bottom:8px;">
+            <div class="ws-group" style="margin-top:0;">Phase 2 · Feature Dev <span style="font-weight:400;color:var(--text-muted);">Jun 29 → Jul 27</span></div>
+            <div class="ws-cards">
+              <div class="wsc" style="border-left:3px solid #FACC15;"><div class="wsc-name">Feature UI designs</div><div class="wsc-meta"><span class="pill p-action">TBC</span></div><div class="wsc-sub">w/c 29 Jun → w/c 13 Jul · 2 weeks</div></div>
+              <div class="wsc" style="border-left:3px solid #FACC15;"><div class="wsc-name">Brand toolkit</div><div class="wsc-meta"><span class="pill p-action">TBC</span></div><div class="wsc-sub">w/c 29 Jun → w/c 13 Jul · 2 weeks</div></div>
+            </div>
+          </div>
+
+          
+          <div class="wsc-dev" style="padding-top:8px; padding-bottom:12px;">
+            <div class="ws-group" style="margin-top:0;">Pre-launch <span style="font-weight:400;color:var(--text-muted);">Jul 27 → Aug 13</span></div>
+            <div class="ws-cards">
+              <div class="wsc" style="opacity:.7;"><div class="wsc-name">Bugfixes &amp; improvements based on product team feedback</div><div class="wsc-meta"><span class="pill p-gray">Not started</span></div></div>
+            </div>
+          </div>
+          <div class="wsc-prod" style="padding-top:8px; padding-bottom:12px;">
+            <div class="ws-group" style="margin-top:0;">Pre-launch <span style="font-weight:400;color:var(--text-muted);">Jul 27 → Aug 13</span></div>
+            <div class="ws-cards">
+              <div class="wsc" style="opacity:.7;"><div class="wsc-name">Pipeline QA + integration testing</div><div class="wsc-meta"><span class="pill p-gray">Not started</span></div></div>
+            </div>
+          </div>
+          <div class="wsc-des" style="padding-top:8px; padding-bottom:12px;">
+            <div class="ws-group" style="margin-top:0;">Pre-launch <span style="font-weight:400;color:var(--text-muted);">Jul 27 → Aug 13</span></div>
+            <div class="ws-cards">
+              <div class="wsc" style="opacity:.7;"><div class="wsc-name">Design QA + final amends</div><div class="wsc-meta"><span class="pill p-gray">Not started</span></div></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      
+      <div class="pane" id="pane-clientview">
+
+        
+        <div style="padding:14px 18px;background:#FEFCE8;border:2px solid #FACC15;border-radius:9px;margin-bottom:18px;display:flex;align-items:flex-start;gap:14px;">
+          <div style="font-size:20px;flex-shrink:0;">⏸</div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:3px;">Currently in Phase 0 — awaiting go-ahead</div>
+            <div style="font-size:12px;color:#374151;line-height:1.6;" contenteditable="true">Development is underway at Phase 0 (onboarding and initial setup). This timeline reflects the planned schedule pending confirmation that the project proceeds. We will update with locked phase milestones once go-ahead is confirmed. Pilot date of <strong>11 August</strong> remains the target anchor.</div>
+          </div>
+        </div>
+
+        
+        <div style="padding:12px 16px;background:#F9FAFB;border:1px solid var(--border);border-radius:8px;margin-bottom:18px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:8px;">📝 Suggested phrasing for client comms</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div style="font-size:12px;color:var(--text);line-height:1.5;padding:8px 10px;background:white;border-radius:6px;border:1px solid var(--border);" contenteditable="true">
+              <strong>On current status:</strong> "We're in the early stages — our development team has completed onboarding and is ready to move into Phase 1 build work once we have your confirmation to proceed."
+            </div>
+            <div style="font-size:12px;color:var(--text);line-height:1.5;padding:8px 10px;background:white;border-radius:6px;border:1px solid var(--border);" contenteditable="true">
+              <strong>On the pilot date:</strong> "Our current plan keeps the 11 August pilot date in place. That window requires us to begin Phase 1 in early June — the sooner we have go-ahead, the more comfortable that timeline becomes."
+            </div>
+            <div style="font-size:12px;color:var(--text);line-height:1.5;padding:8px 10px;background:white;border-radius:6px;border:1px solid var(--border);" contenteditable="true">
+              <strong>On the feedback window:</strong> "We've built a feedback and review window into the plan from mid-June — this is where your team's input will be integrated before we move into final hardening."
+            </div>
+            <div style="font-size:12px;color:var(--text);line-height:1.5;padding:8px 10px;background:white;border-radius:6px;border:1px solid var(--border);" contenteditable="true">
+              <strong>Avoid saying:</strong> Phase names, tech stack details (AE, LucidLink, AWS), internal team names (Sofia/Athlon), or anything that signals the project might not go ahead.
+            </div>
+          </div>
+        </div>
+
+        
+        <div class="card">
+          <div class="card-title">High-level Timings · May – August 2026</div>
+          <div style="overflow-x:auto;">
+            <div id="rm-client-chart" style="min-width:900px;padding-bottom:8px;"></div>
+          </div>
+          <div style="display:flex;gap:16px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted);"><div style="width:14px;height:9px;background:#2563EB;border-radius:2px;opacity:0.5;"></div>Development (pending go-ahead)</div>
+            <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted);"><div style="width:14px;height:9px;background:#059669;border-radius:2px;"></div>Client</div>
+            <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted);"><div style="width:14px;height:9px;background:#FEFCE8;border:2px solid #FACC15;border-radius:2px;"></div>TBC</div>
+            <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted);"><div style="width:18px;height:2px;border-top:2px dashed #DC2626;"></div>Pilot</div>
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="pane" id="pane-client">
+
+        
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-title">High-level Timings · Client View</div>
+          <div style="overflow-x:auto;">
+            <div id="rm-chart-clientwip" style="min-width:900px;padding-bottom:8px;"></div>
+          </div>
+          <div style="display:flex;gap:16px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted);"><div style="width:14px;height:9px;background:#2563EB;border-radius:2px;opacity:0.5;"></div>Development</div>
+            <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted);"><div style="width:14px;height:9px;background:#059669;border-radius:2px;"></div>Client</div>
+            <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted);"><div style="width:14px;height:9px;background:#FEFCE8;border:2px solid #FACC15;border-radius:2px;"></div>TBC</div>
+          </div>
+        </div>
+
+        <hr style="border:none;border-top:1px solid var(--border);margin-bottom:16px;">
+
+        <div class="edit-hint">✏ All fields editable — click to update</div>
+
+        
+        <div class="sec-title">Contacts</div>
+        <div class="contact-grid">
+          <div class="contact-card">
+            <div class="cc-name" contenteditable="true">—</div>
+            <div class="cc-role" contenteditable="true">Role · Amazon</div>
+            <div class="cc-detail" contenteditable="true">Timezone · Comms channel: —</div>
+          </div>
+          <div class="contact-card">
+            <div class="cc-name" contenteditable="true">—</div>
+            <div class="cc-role" contenteditable="true">Role · Amazon</div>
+            <div class="cc-detail" contenteditable="true">Timezone · Comms channel: —</div>
+          </div>
+          <div class="contact-card" style="border:1px dashed var(--border);background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-muted);font-size:12px;" onclick="addContact()">
+            + Add contact
+          </div>
+        </div>
+
+        
+        <div class="sec-title">Agreements</div>
+        <div class="agr-list">
+          <div class="agr-item">
+            <div class="agr-body">
+              <div class="agr-name">Pilot terms</div>
+              <div class="agr-notes" contenteditable="true">Notes: —</div>
+            </div>
+            <span class="pill p-progress">In Progress</span>
+          </div>
+          <div class="agr-item">
+            <div class="agr-body">
+              <div class="agr-name">Test content sign-off</div>
+              <div class="agr-notes" contenteditable="true">Notes: —</div>
+            </div>
+            <span class="pill p-action">Pending</span>
+          </div>
+          <div class="agr-item">
+            <div class="agr-body">
+              <div class="agr-name">Feedback integration process</div>
+              <div class="agr-notes" contenteditable="true">Notes: —</div>
+            </div>
+            <span class="pill p-gray">TBC</span>
+          </div>
+          <div class="agr-item">
+            <div class="agr-body">
+              <div class="agr-name">Onboarding plan for Amazon users</div>
+              <div class="agr-notes" contenteditable="true">Notes: —</div>
+            </div>
+            <span class="pill p-gray">Not started</span>
+          </div>
+        </div>
+
+        
+        <div class="sec-title">
+          Comms Log
+          <button class="small-btn" onclick="addComms()">+ Add entry</button>
+        </div>
+        <div class="comms-list" id="comms-list">
+          <div class="comms-entry">
+            <div class="comms-date">31 May 2026</div>
+            <div class="comms-body">
+              <div class="comms-format">Written update</div>
+              <div class="comms-summary" contenteditable="true">Project kickoff — Phase 1 underway, pilot confirmed 11 Aug.</div>
+              <div class="comms-next" contenteditable="true">→ Next: bi-weekly written update due ~14 Jun</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="pane" id="pane-time">
+        <div class="card">
+          <div class="card-title">Time Tracking</div>
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:280px;color:var(--text-muted);gap:8px;">
+            <div style="font-size:36px;">⏱</div>
+            <div style="font-weight:600;font-size:14px;">Time tracking coming soon</div>
+            <div style="font-size:12px;text-align:center;max-width:280px;">This tab will log time against workstreams once the format is agreed. Connect a time-tracking tool or log manually.</div>
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="pane active" id="pane-briefing">
+        <div class="edit-hint">✏ All sections editable · Run of show for the kick-off session</div>
+
+        
+        <div style="margin-bottom:32px;">
+          <div style="font-size:28px;font-weight:800;color:#111827;letter-spacing:-0.5px;margin-bottom:6px;">Welcome 👋</div>
+          <div style="font-size:16px;color:var(--text-muted);font-weight:400;" contenteditable="true">We're here to align on what we're building, meet the people building it, and agree how we work — so we can move fast, stay visible, and deliver something none of us have built before.</div>
+        </div>
+
+        
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:28px;">
+
+          
+          <div style="background:var(--gray-light);border:1px solid var(--border);border-radius:8px;padding:14px 16px;">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:10px;">Today</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;align-items:flex-start;gap:8px;font-size:13px;"><span style="color:#059669;font-size:14px;font-weight:700;flex-shrink:0;margin-top:0px;">✓</span><span contenteditable="true">Everyone understands the project and why it matters</span></div>
+              <div style="display:flex;align-items:flex-start;gap:8px;font-size:13px;"><span style="color:#059669;font-size:14px;font-weight:700;flex-shrink:0;">✓</span><span contenteditable="true">Everyone meets everyone and can speak to their role on the project</span></div>
+              <div style="display:flex;align-items:flex-start;gap:8px;font-size:13px;"><span style="color:#059669;font-size:14px;font-weight:700;flex-shrink:0;">✓</span><span contenteditable="true">Everyone has acknowledged the project roadmap and understands the ways of working cadence at a high-level</span></div>
+              <div style="display:flex;align-items:flex-start;gap:8px;font-size:13px;"><span style="color:#059669;font-size:14px;font-weight:700;flex-shrink:0;">✓</span><span contenteditable="true">Demo of the product with opportunity for questions</span></div>
+            </div>
+          </div>
+
+          
+          <div style="background:var(--gray-light);border:1px solid var(--border);border-radius:8px;padding:14px 16px;">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:10px;">This week</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;align-items:flex-start;gap:8px;font-size:13px;"><span style="color:#059669;font-size:14px;font-weight:700;flex-shrink:0;">✓</span><span contenteditable="true">Ways of working alignment — from Day 1 — session to define all tasks (Phase 1 priority) and how these are connecting (Dev × KT, and Production × KT)</span></div>
+              <div style="display:flex;align-items:flex-start;gap:8px;font-size:13px;"><span style="color:#059669;font-size:14px;font-weight:700;flex-shrink:0;">✓</span><span contenteditable="true">Weekly stand ups established</span></div>
+              <div style="display:flex;align-items:flex-start;gap:8px;font-size:13px;"><span style="color:#059669;font-size:14px;font-weight:700;flex-shrink:0;">✓</span><span contenteditable="true">Other key meetings established — e.g. Guillaume to walk through the AE animation process and how the pipes connect, and an Atlas and Miro board session to align on where we can contribute and how/when this will be used</span></div>
+              <div style="display:flex;align-items:flex-start;gap:8px;font-size:13px;"><span style="color:#059669;font-size:14px;font-weight:700;flex-shrink:0;">✓</span><span contenteditable="true">Muyiwa briefed on plug-in brief / handover for Sofia to quote accurately</span></div>
+              <div style="display:flex;align-items:flex-start;gap:8px;font-size:13px;"><span style="color:#059669;font-size:14px;font-weight:700;flex-shrink:0;">✓</span><span contenteditable="true">Updated co-work hub shared (email access to be discussed)</span></div>
+            </div>
+          </div>
+
+        </div>
+
+        
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;">
+          <div style="background:#111827;border-radius:10px;padding:16px 20px;">
+            <div style="font-size:10px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px;">The problem</div>
+            <div style="font-size:16px;font-weight:800;color:#fff;line-height:1.3;letter-spacing:-0.3px;">Amazon's review process is costing time, money and momentum</div>
+          </div>
+          <div style="background:#fff;border:2px solid #D1D5DB;border-radius:10px;padding:16px 20px;">
+            <div style="font-size:10px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px;">The solution</div>
+            <div style="font-size:16px;font-weight:800;color:#111827;line-height:1.3;letter-spacing:-0.3px;">RoadRunner — an AI-powered creative review and production platform</div>
+          </div>
+        </div>
+
+        
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;">
+          
+          <div style="background:#111827;border-radius:10px;padding:20px;">
+            <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9CA3AF;margin-bottom:10px;">This is...</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span style="color:#EF4444;font-size:13px;flex-shrink:0;">✕</span><span style="font-size:12px;color:#9CA3AF;">Not a SaaS product</span></div>
+            <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;"><span style="color:#22C55E;font-size:13px;flex-shrink:0;">✓</span><span style="font-size:12px;color:#E5E7EB;">Proprietary tooling built around Amazon's enterprise environment</span></div>
+            <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;"><span style="color:#22C55E;font-size:13px;flex-shrink:0;">✓</span><span style="font-size:12px;color:#E5E7EB;">Comes from embedded producers and our creative talent network</span></div>
+            <div style="display:flex;align-items:flex-start;gap:8px;"><span style="color:#22C55E;font-size:13px;flex-shrink:0;">✓</span><span style="font-size:12px;color:#E5E7EB;">Comes with the team, not instead of it</span></div>
+          </div>
+          
+          <div style="background:#F9FAFB;border:1px solid var(--border);border-radius:10px;padding:20px;">
+            <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:10px;">Benefits to the client</div>
+            <div style="display:flex;flex-direction:column;gap:7px;">
+              <div style="display:flex;gap:8px;font-size:12px;"><span style="flex-shrink:0;">🎯</span><span>Reviewers motivated to engage — time-boxed, guided, fewer contradictions</span></div>
+              <div style="display:flex;gap:8px;font-size:12px;"><span style="flex-shrink:0;">📊</span><span>Measurable AI efficiency — built in, not bolted on. Answers Amazon's internal mandate directly</span></div>
+              <div style="display:flex;gap:8px;font-size:12px;"><span style="flex-shrink:0;">🔁</span><span>Feedback compounds — same note never gets made twice, noise reduces every round</span></div>
+              <div style="display:flex;gap:8px;font-size:12px;"><span style="flex-shrink:0;">⚙️</span><span>Production focused — routine changes handled by AI, complex ones still queue to humans</span></div>
+              <div style="display:flex;gap:8px;font-size:12px;"><span style="flex-shrink:0;">📦</span><span>Brand knowledge built in — brand × territory × language × project layer</span></div>
+              <div style="display:flex;gap:8px;font-size:12px;"><span style="flex-shrink:0;">✏️</span><span>Reviewers feel empowered — fix small things themselves, within guardrails. <strong>No one else has this.</strong></span></div>
+            </div>
+          </div>
+          
+          <div style="background:#F9FAFB;border:1px solid var(--border);border-radius:10px;padding:20px;">
+            <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:10px;">Benefits to Multiplayer</div>
+            <div style="display:flex;flex-direction:column;gap:7px;">
+              <div style="display:flex;gap:8px;font-size:12px;"><span style="flex-shrink:0;">📈</span><span>The market is moving. Agencies rebuilding around AI are delivering faster, at quality, without scaling headcount — this is what clients will expect as standard</span></div>
+              <div style="display:flex;gap:8px;font-size:12px;"><span style="flex-shrink:0;">🏗</span><span>Proves we can deliver at market speed, at quality, using AI — our ability to compete depends on it</span></div>
+              <div style="display:flex;gap:8px;font-size:12px;"><span style="flex-shrink:0;">🤝</span><span>Strengthens Creative N—S embedded model — the closer we are to how a client actually works, the better placed we are to remove friction</span></div>
+            </div>
+          </div>
+        </div>
+
+        
+        <div style="padding:16px 20px;background:#111827;border-left:4px solid #FACC15;border-radius:0 8px 8px 0;margin-bottom:20px;">
+          <div style="font-size:13px;font-weight:700;color:#FACC15;margin-bottom:4px;">This is also a Multiplayer business investment</div>
+          <div style="font-size:12px;color:#D1D5DB;line-height:1.6;">The methodology — Claude Code in the middle, building fast, hardening, shipping, repeating — is intended to become a repeatable model for how Multiplayer builds and delivers. RoadRunner is the proof of concept for that model as much as it is a product in its own right.</div>
+        </div>
+
+        
+        <div style="padding:16px 20px;background:#111827;border-left:4px solid #2563EB;border-radius:0 8px 8px 0;margin-bottom:20px;">
+          <div style="font-size:13px;font-weight:700;color:#93C5FD;margin-bottom:6px;">The methodology — and why it's not an afterthought</div>
+          <div style="font-size:12px;color:#D1D5DB;line-height:1.7;">This project runs on connected infrastructure: ClickUp (Dev), Notion (Production), and Slack (#mp_roadrunner) all feed into a single CoWork dashboard that updates daily. Every workstream speaks to the others. The result is a complete, accurate picture of where we are in the plan — without anyone having to chase it.<br><br>This matters because moving fast only works if the team stays aligned without burning time on it. When everything is tracked and visible, we spend less time in meetings asking "where are we?" and more time on the conversations that actually need the room. Blockers surface early, friction between workstreams reduces, and a shared source of truth replaces email chains, repeated check-ins, and guesswork. This is the infrastructure that makes pace sustainable — and it only works if everyone commits to keeping it current.</div>
+        </div>
+
+        
+        <div style="margin-bottom:20px;">
+          <div style="font-size:14px;font-weight:700;color:#111827;margin-bottom:12px;">The workstreams</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+            <div style="padding:14px 14px 14px 18px;background:linear-gradient(to right,#2563EB 4px,#F9FAFB 4px);border:1px solid var(--border);border-radius:7px;">
+              <div style="font-size:13px;font-weight:700;color:#2563EB;">Dev</div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Sofia</div>
+              <div style="font-size:11px;color:var(--text);margin-top:6px;line-height:1.5;">Taking the prototype, stress-testing what works, identifying the gaps, then building the missing parts — methodically, with Claude, and with quality.</div>
+            </div>
+            <div style="padding:14px 14px 14px 18px;background:linear-gradient(to right,#D97706 4px,#F9FAFB 4px);border:1px solid var(--border);border-radius:7px;">
+              <div style="font-size:13px;font-weight:700;color:#D97706;">Production</div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Guillaume · Muyiwa</div>
+              <div style="font-size:11px;color:var(--text);margin-top:6px;line-height:1.5;">Building and connecting the AE tooling that sits between the creative files and the platform — so video content can move through the pipeline automatically, without constant manual intervention.</div>
+            </div>
+            <div style="padding:14px 14px 14px 18px;background:linear-gradient(to right,#7C3AED 4px,#F9FAFB 4px);border:1px solid var(--border);border-radius:7px;">
+              <div style="font-size:13px;font-weight:700;color:#7C3AED;">Design</div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">TBC designer</div>
+              <div style="font-size:11px;color:var(--text);margin-top:6px;line-height:1.5;">Defining how the platform looks and feels — from the feature UI through to a brand toolkit that makes it feel distinctly RoadRunner.</div>
+            </div>
+            <div style="padding:14px 14px 14px 18px;background:linear-gradient(to right,#059669 4px,#F9FAFB 4px);border:1px solid var(--border);border-radius:7px;">
+              <div style="font-size:13px;font-weight:700;color:#059669;">Client</div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Kateland · Rob</div>
+              <div style="font-size:11px;color:var(--text);margin-top:6px;line-height:1.5;">Managing the Amazon relationship — keeping communication tight and timely, making sure the pilot is set up to succeed, and ensuring agreements, expectations, and feedback windows are all in place before August.</div>
+            </div>
+          </div>
+        </div>
+
+        
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px;">
+          <div style="padding:20px 22px;background:#F9FAFB;border:2px solid #D1D5DB;border-radius:10px;text-align:center;">
+            <div style="font-size:28px;margin-bottom:4px;">🧪</div><div style="font-size:22px;font-weight:900;color:#111827;letter-spacing:-0.5px;">Experimental</div>
+          </div>
+          <div style="padding:20px 22px;background:#F9FAFB;border:2px solid #D1D5DB;border-radius:10px;text-align:center;">
+            <div style="font-size:28px;margin-bottom:4px;">⚡</div><div style="font-size:22px;font-weight:900;color:#111827;letter-spacing:-0.5px;">Fast</div>
+          </div>
+          <div style="padding:20px 22px;background:#F9FAFB;border:2px solid #D1D5DB;border-radius:10px;text-align:center;">
+            <div style="font-size:28px;margin-bottom:4px;">👁</div><div style="font-size:22px;font-weight:900;color:#111827;letter-spacing:-0.5px;">Visible</div>
+          </div>
+        </div>
+
+        
+        <div style="padding:16px 24px;background:#F9FAFB;border:1px solid #D1D5DB;border-radius:10px;text-align:center;margin-bottom:24px;">
+          <div style="font-size:14px;font-weight:600;color:#374151;line-height:1.5;">Never assume, ask questions — we're all learning and testing new ways of working</div>
+        </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ── TAB SWITCHING ──
+function switchTab(id, el) {
+  document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('pane-' + id).classList.add('active');
+  el.classList.add('active');
+  if (id === 'client') { setTimeout(function(){ buildClientRoadmapForWip(); }, 50); }
+}
+
+// ── COUNTDOWNS ──
+// Count working days (Mon–Fri) from today up to (not including) target
+function workingDaysUntil(target) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const end = new Date(target); end.setHours(0,0,0,0);
+  if (end <= today) return 0;
+  let count = 0, d = new Date(today);
+  while (d < end) {
+    const wd = d.getDay();
+    if (wd !== 0 && wd !== 6) count++;
+    d.setDate(d.getDate() + 1);
+  }
+  return count;
+}
+
+function updateCountdowns() {
+  const phase1End = new Date('2026-06-29'); // Phase 1 = 4 weeks from Jun 1 = 20 working days
+  const pilot     = new Date('2026-08-11');
+  const phaseDays = workingDaysUntil(phase1End);
+  const pilotDays = workingDaysUntil(pilot);
+  document.getElementById('pilot-badge').textContent = '✈ ' + pilotDays + ' working days to pilot';
+  document.getElementById('phase-end-badge').textContent = 'Phase ends in ' + phaseDays + ' working days';
+  if (phaseDays <= 0) {
+    document.getElementById('phase-badge').textContent = 'Build · Phase 2';
+  }
+}
+
+// ── GOAL PROGRESS ──
+function updatePct() {
+  const items = document.querySelectorAll('#goal-list .goal-item');
+  let done = 0;
+  items.forEach(item => {
+    const cb = item.querySelector('input');
+    if (cb.checked) { item.classList.add('done'); done++; }
+    else item.classList.remove('done');
+  });
+  const pct = Math.round(done / items.length * 100);
+  document.getElementById('week-pct').textContent = pct + '% complete';
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = done + ' of ' + items.length + ' items complete';
+}
+
+// ── DAILY CHECKLIST PERSISTENCE ──
+function saveChecks() {
+  const today = new Date().toDateString();
+  const s = {};
+  for (let i = 1; i <= 5; i++) s['c'+i] = document.getElementById('c'+i).checked;
+  try { localStorage.setItem('rr_checks_' + today, JSON.stringify(s)); } catch(e) {}
+}
+function loadChecks() {
+  const today = new Date().toDateString();
+  try {
+    const s = JSON.parse(localStorage.getItem('rr_checks_' + today) || 'null');
+    if (s) for (let i = 1; i <= 5; i++) if (s['c'+i]) document.getElementById('c'+i).checked = true;
+  } catch(e) {}
+}
+
+// ── SLACK FEED ──
+async function loadSlack() {
+  const feed = document.getElementById('slack-feed');
+  feed.innerHTML = '<div class="slack-empty">Loading…</div>';
+  try {
+    const result = await window.cowork.callMcpTool(
+      'mcp__12dc2430-ac29-4902-8fd8-dcd18de3500a__slack_read_channel',
+      { channel_id: 'C0B31DXFJ9X', limit: 15, response_format: 'concise' }
+    );
+
+    // Structure: result.content[0].text = JSON string => {messages: "..."}
+    let raw = '';
+    try {
+      let inner = result;
+      // Unwrap content array if present
+      if (inner?.content?.[0]?.text) inner = inner.content[0].text;
+      // If still a string, parse it
+      if (typeof inner === 'string') inner = JSON.parse(inner);
+      // Now inner should be {messages: "...", pagination_info: "..."}
+      if (typeof inner?.messages === 'string') raw = inner.messages;
+    } catch(e) {}
+    // Last resort: stringify and regex-extract
+    if (!raw) {
+      const dump = JSON.stringify(result);
+      const m = dump.match(/"messages":"((?:[^"\\]|\\.)*)"/);
+      if (m) raw = m[1].replace(/\\n/g,'\n').replace(/\\t/g,'\t').replace(/\\"/g,'"').replace(/\\\\/g,'\\');
+    }
+
+    if (!raw) {
+      feed.innerHTML = '<div class="slack-empty" style="color:var(--amber);">No messages received</div>';
+      setSlackStatus(false); return;
+    }
+
+    // Each message block is separated by \n\n; format: "Author: text [date time TZ]"
+    const blocks = raw.split('\n\n').map(b => b.trim()).filter(b =>
+      b && !b.startsWith('Channel') && !b.startsWith('#mp_') && !b.startsWith('There are')
+    );
+
+    const msgs = [];
+    blocks.forEach(block => {
+      const line = block.replace(/\n/g, ' ').trim();
+      const tsMatch = line.match(/\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2})[^\]]*\]\s*$/);
+      const ts = tsMatch ? tsMatch[1] : '';
+      const body = tsMatch ? line.slice(0, line.lastIndexOf(tsMatch[0])).trim() : line;
+      const ci = body.indexOf(': ');
+      if (ci < 1) return;
+      const author = body.slice(0, ci).trim();
+      const raw_text = body.slice(ci + 2)
+        .replace(/<https?:\/\/[^|>]+\|([^>]+)>/g, '$1')
+        .replace(/<https?:\/\/[^>]+>/g, '[link]')
+        .replace(/<@[^|>]+\|([^>]+)>/g, '@$1')
+        .replace(/<[^>]+>/g, '')
+        .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim();
+      const text = raw_text || '[shared a link]';
+      if (author) msgs.push({ author, text, ts });
+    });
+
+    if (!msgs.length) {
+      feed.innerHTML = '<div class="slack-empty">No messages to show</div>';
+      setSlackStatus(false); return;
+    }
+
+    feed.innerHTML = '';
+    const avatarColors = ['#2563EB','#7C3AED','#D97706','#059669','#DC2626','#0891B2','#9333EA','#EA580C'];
+    const colorMap = {};
+    msgs.slice(0, 15).forEach(m => {
+      if (!colorMap[m.author]) {
+        colorMap[m.author] = avatarColors[Object.keys(colorMap).length % avatarColors.length];
+      }
+      const initials = m.author.split(/[\s_]+/).map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
+      const d = document.createElement('div');
+      d.className = 'slack-msg';
+      d.innerHTML = `<div class="slack-avatar" style="background:${colorMap[m.author]}">${esc(initials)}</div><div class="slack-body"><div class="slack-author">${esc(m.author)}</div><div class="slack-text">${esc(m.text.slice(0,140))}</div><div class="slack-time">${esc(m.ts)}</div></div>`;
+      feed.appendChild(d);
+    });
+    setSlackStatus(true);
+  } catch(e) {
+    feed.innerHTML = `<div class="slack-empty">Error: ${esc(e.message||String(e))}</div>`;
+    setSlackStatus(false);
+  }
+}
+
+function setSlackStatus(ok) {
+  document.getElementById('slack-dot').className = 'dot ' + (ok ? 'dot-green' : 'dot-amber');
+  document.getElementById('slack-status').textContent = ok ? 'Live' : 'Error';
+  document.getElementById('slack-status').style.color = ok ? 'var(--green)' : 'var(--amber)';
+  document.getElementById('slack-ts').textContent = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+}
+
+function esc(s) {
+  return (s+'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── CLIENT HELPERS ──
+function addContact() {
+  const grid = document.querySelector('.contact-grid');
+  const addBtn = grid.querySelector('[onclick="addContact()"]');
+  const card = document.createElement('div');
+  card.className = 'contact-card';
+  card.innerHTML = `<div class="cc-name" contenteditable="true">Name</div><div class="cc-role" contenteditable="true">Role · Amazon</div><div class="cc-detail" contenteditable="true">Timezone · Comms: —</div>`;
+  grid.insertBefore(card, addBtn);
+}
+
+function addContact_ob() {
+  const grid = document.getElementById('ob-contacts');
+  const addBtn = grid.querySelector('[onclick="addContact_ob()"]');
+  const card = document.createElement('div');
+  card.className = 'contact-card';
+  card.style.borderTop = '3px solid var(--border)';
+  card.innerHTML = `<div class="cc-name" contenteditable="true">Name</div><div class="cc-role" contenteditable="true">Role · Team</div><div class="cc-detail" contenteditable="true">TBC</div>`;
+  grid.insertBefore(card, addBtn);
+}
+function addGoal() {
+  const grid = document.getElementById('ob-goals');
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--gray-light);border-radius:7px;border:1px solid var(--border);';
+  div.innerHTML = `<input type="checkbox" style="margin-top:2px;width:15px;height:15px;flex-shrink:0;"><span contenteditable="true" style="font-size:13px;">New goal…</span>`;
+  grid.appendChild(div);
+}
+
+function addComms() {
+  const list = document.getElementById('comms-list');
+  const d = new Date();
+  const dateStr = d.toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'});
+  const entry = document.createElement('div');
+  entry.className = 'comms-entry';
+  entry.innerHTML = `
+    <div class="comms-date" contenteditable="true">${dateStr}</div>
+    <div class="comms-body">
+      <div class="comms-format" contenteditable="true">Written update</div>
+      <div class="comms-summary" contenteditable="true">Summary…</div>
+      <div class="comms-next" contenteditable="true">→ Next action…</div>
+    </div>`;
+  list.insertBefore(entry, list.firstChild);
+}
+
+// ── ROADMAP ──
+function buildRoadmap() {
+  const el = document.getElementById('rm-chart');
+  if (!el) return;
+
+  const START   = new Date('2026-05-18'); // Mon 18 May — Phase 0 week 1
+  const END     = new Date('2026-08-31');
+  const TOTAL   = Math.round((END - START) / 86400000); // 105 days
+  const TODAY   = new Date();
+  const LABEL_W = 116;
+  const ROW_H   = 26;
+  const ROW_GAP = 5;
+  const LANE_PAD = 12;  // uniform vertical breathing room per lane
+  const LANE_MB  = 8;   // consistent gap between lanes
+  const HDR_H    = 58;  // month row (20) + milestone row (14) + week row (24)
+
+  function d(s) {
+    var p = s.split('-');
+    var dt = new Date(parseInt(p[0]), parseInt(p[1])-1, parseInt(p[2]));
+    var base = new Date(2026, 4, 18); // May 18 local time
+    return Math.round((dt - base) / 86400000);
+  }
+  function pct(day) { return (Math.max(0,Math.min(TOTAL,day))/TOTAL*100).toFixed(3)+'%'; }
+  function wPct(s,e) { return (Math.max(0,e-s)/TOTAL*100).toFixed(3)+'%'; }
+  function rowTop(row) { return LANE_PAD + row*(ROW_H+ROW_GAP); }
+  function isPast(ed) { return new Date(START.getTime()+ed*86400000) < TODAY; }
+
+  // Mondays from START
+  const weeks = [];
+  for (let day=0; day<=TOTAL; day+=7) {
+    const dt = new Date(START); dt.setDate(dt.getDate()+day);
+    weeks.push({ day, num: dt.getDate(), even: (day/7)%2===0 });
+  }
+
+  // Month header spans
+  const months = [
+    { label:'May',    s:d('2026-05-18'), e:d('2026-06-01') },
+    { label:'June',   s:d('2026-06-01'), e:d('2026-07-01') },
+    { label:'July',   s:d('2026-07-01'), e:d('2026-08-01') },
+    { label:'August', s:d('2026-08-01'), e:TOTAL },
+  ];
+
+  // Phase 1 end matches the Phase 1 bar end (Jun 29 = day 42)
+  const milestones = [
+    { day:d('2026-07-13'), label:'Phase 1 end', color:'#2563EB' },
+    { day:d('2026-08-11'), label:'✈ Pilot',     color:'#DC2626', bold:true },
+  ];
+
+  const STYLES = {
+    dev:    'background:#2563EB;color:#fff;',
+    prod:   'background:#D97706;color:#fff;',
+    design: 'background:#7C3AED;color:#fff;',
+    client: 'background:#059669;color:#fff;',
+    risk:   'background:#FEFCE8;border:2px solid #FACC15;color:#713F12;',
+    past:   'background:#4B5563;color:#e5e7eb;',
+  };
+  const LANE_COLORS = { Dev:'#2563EB', Production:'#D97706', Design:'#7C3AED', Client:'#059669' };
+
+  const lanes = [
+    { title:'Dev', sub:'Sofia', rows:2, bars:[
+      // Phase 0 = past two weeks (May 18 → Jun 1)
+      { label:'Phase 0 · Onboarding',        s:d('2026-05-18'), e:d('2026-06-01'), row:0, cls:'dev', forcePast:true },
+      { label:'Phase 1 · Foundations (4 weeks)',  s:d('2026-06-01'), e:d('2026-06-29'), row:0, cls:'dev' },
+      { label:'Phase 2 · Feature Dev (4 weeks)',  s:d('2026-06-29'), e:d('2026-07-27'), row:0, cls:'dev', op:0.75 },
+      { label:'Pre-launch (2.5 weeks)',            s:d('2026-07-27'), e:d('2026-08-13'), row:0, cls:'dev', op:0.55 },
+      { label:'⚠ AE plugin build · timing TBC',   s:d('2026-06-15'), e:d('2026-07-15'), row:1, cls:'risk' },
+    ]},
+    { title:'Production', sub:'Guillaume · Muyiwa', rows:2, bars:[
+      // Muyiwa dump: w/c 1 Jun + w/c 8 Jun = Jun 1 → Jun 15
+      { label:'Muyiwa · knowledge dump',     s:d('2026-06-01'), e:d('2026-06-15'), row:0, cls:'prod' },
+      { label:'⚠ manifest.json script',      s:d('2026-06-15'), e:d('2026-06-22'), row:0, cls:'risk' },
+      { label:'AE Transloc script',          s:d('2026-06-22'), e:d('2026-07-03'), row:0, cls:'prod' },
+      { label:'LucidLink integration',       s:d('2026-06-15'), e:d('2026-06-26'), row:1, cls:'prod' },
+      { label:'Captioning + Audio (TBC)',    s:d('2026-06-26'), e:d('2026-07-06'), row:1, cls:'prod', op:0.8 },
+    ]},
+    { title:'Design', sub:'TBC designer', rows:2, bars:[
+      { label:'⚠ Feature UI designs · designer not yet resourced', s:d('2026-06-29'), e:d('2026-07-13'), row:0, cls:'risk' },
+      { label:'⚠ Brand toolkit · designer not yet resourced',      s:d('2026-06-29'), e:d('2026-07-13'), row:1, cls:'risk' },
+    ]},
+    { title:'Client', sub:'Kateland · Rob', rows:3, bars:[
+      // Only item starting w/c May 25 besides Phase 0
+      { label:'Pilot agreement · in progress',      s:d('2026-05-25'), e:d('2026-06-30'), row:0, cls:'client' },
+      { label:'⚠ Feedback window · not scheduled',  s:d('2026-06-15'), e:d('2026-07-15'), row:1, cls:'risk' },
+      { label:'⚠ Broader marketing team shares',    s:d('2026-06-15'), e:d('2026-07-15'), row:2, cls:'risk' },
+    ]},
+  ];
+
+  const totalH = lanes.reduce((sum,l)=> sum + l.rows*(ROW_H+ROW_GAP)-ROW_GAP+LANE_PAD*2+LANE_MB, 0);
+  const todayDay = Math.round((TODAY - START) / 86400000);
+
+  let html = `<div style="position:relative;padding-top:${HDR_H}px;width:100%;">`;
+
+  // ── Month header row (row 1 of 3) ──
+  html += `<div style="position:absolute;top:0;left:${LABEL_W}px;right:0;height:20px;background:#F9FAFB;border-bottom:1px solid var(--border);">`;
+  months.forEach(m => {
+    if (Math.min(m.e,TOTAL) - m.s <= 0) return;
+    html += `<div style="position:absolute;left:${pct(m.s)};width:${wPct(m.s,Math.min(m.e,TOTAL))};height:20px;display:flex;align-items:center;padding-left:6px;font-size:11px;font-weight:700;color:var(--text-muted);border-left:1px solid var(--border);box-sizing:border-box;">${m.label}</div>`;
+  });
+  html += `</div>`;
+
+  // ── Milestone label row (row 2 of 3) — dedicated space so week dates stay clear ──
+  html += `<div style="position:absolute;top:20px;left:${LABEL_W}px;right:0;height:14px;background:#fff;overflow:visible;">`;
+  milestones.forEach(m => {
+    html += `<div style="position:absolute;left:${pct(m.day)};top:0;height:14px;border-left:2px dashed ${m.color};z-index:4;">
+      <span style="position:absolute;top:0;left:4px;font-size:9px;font-weight:${m.bold?700:600};color:${m.color};white-space:nowrap;line-height:14px;">${m.label}</span>
+    </div>`;
+  });
+  // TODAY label in this row too
+  if (todayDay >= 0 && todayDay <= TOTAL) {
+    html += `<div style="position:absolute;left:${pct(todayDay)};top:0;height:14px;border-left:2px solid #EF4444;z-index:5;">
+      <span style="position:absolute;top:0;left:4px;font-size:9px;font-weight:700;color:#EF4444;white-space:nowrap;line-height:14px;">Today</span>
+    </div>`;
+  }
+  html += `</div>`;
+
+  // ── Week tick row (row 3 of 3) ──
+  html += `<div style="position:absolute;top:34px;left:${LABEL_W}px;right:0;height:24px;border-bottom:2px solid #D1D5DB;background:#fff;">`;
+  weeks.forEach(w => {
+    html += `<div style="position:absolute;left:${pct(w.day)};top:0;bottom:0;border-left:1px solid #E5E7EB;padding-left:3px;font-size:9px;color:var(--text-muted);display:flex;align-items:center;">${w.num}</div>`;
+  });
+  html += `</div>`;
+
+  // ── Alternating week bands ──
+  html += `<div style="position:absolute;top:${HDR_H}px;left:${LABEL_W}px;right:0;height:${totalH}px;pointer-events:none;overflow:hidden;">`;
+  weeks.forEach(w => {
+    if (!w.even) return;
+    html += `<div style="position:absolute;left:${pct(w.day)};width:${wPct(w.day,w.day+7)};top:0;bottom:0;background:rgba(0,0,0,0.018);"></div>`;
+  });
+  html += `</div>`;
+
+  // ── Grid lines + milestone lines + TODAY ──
+  html += `<div style="position:absolute;top:${HDR_H}px;left:${LABEL_W}px;right:0;height:${totalH}px;pointer-events:none;">`;
+  weeks.forEach(w => {
+    html += `<div style="position:absolute;left:${pct(w.day)};top:0;bottom:0;width:1px;background:#E9EAEC;"></div>`;
+  });
+  // Lines only in chart body — labels are in the dedicated header row above
+  milestones.forEach(m => {
+    html += `<div style="position:absolute;left:${pct(m.day)};top:0;bottom:0;border-left:2px dashed ${m.color};z-index:4;"></div>`;
+  });
+  if (todayDay >= 0 && todayDay <= TOTAL) {
+    html += `<div style="position:absolute;left:${pct(todayDay)};top:0;bottom:0;border-left:2px solid #EF4444;z-index:5;"></div>`;
+  }
+  html += `</div>`;
+
+  // ── Lanes ──
+  lanes.forEach(lane => {
+    const laneH = lane.rows*(ROW_H+ROW_GAP)-ROW_GAP+LANE_PAD*2;
+    const ac = LANE_COLORS[lane.title]||'#6B7280';
+    html += `<div style="display:flex;align-items:flex-start;margin-bottom:${LANE_MB}px;">`;
+    html += `<div style="width:${LABEL_W}px;flex-shrink:0;padding:${LANE_PAD}px 10px ${LANE_PAD}px 8px;border-left:3px solid ${ac};">
+      <div style="font-size:12px;font-weight:700;color:${ac};line-height:1.2;">${lane.title}</div>
+      <div style="font-size:10px;color:var(--text-muted);margin-top:1px;">${lane.sub}</div>
+    </div>`;
+    html += `<div style="flex:1;position:relative;height:${laneH}px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);min-width:0;">`;
+    lane.bars.forEach(b => {
+      const past = b.forcePast || isPast(b.e);
+      const style = past ? STYLES.past : (STYLES[b.cls]||STYLES.past);
+      const op = (b.op && !past) ? `opacity:${b.op};` : '';
+      const top = rowTop(b.row);
+      const safe = b.label.replace(/'/g,"\\'");
+      html += `<div onmouseenter="showRmTip(event,'${safe}')" onmouseleave="hideRmTip()" style="position:absolute;left:${pct(b.s)};width:${wPct(b.s,b.e)};min-width:4px;top:${top}px;height:${ROW_H}px;${style}${op}border-radius:4px;display:flex;align-items:center;padding:0 6px;font-size:10px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:2;cursor:default;box-sizing:border-box;">${b.label}</div>`;
+    });
+    html += `</div></div>`;
+  });
+
+  html += `</div>`;
+  el.innerHTML = html;
+}
+
+// ── CLICKUP LIVE TASKS ──
+async function loadDevTasks() {
+  var container = document.getElementById('clickup-phase1-tasks');
+  if (!container) return;
+  container.innerHTML = '<div style="font-size:12px;color:#6B7280;padding:10px;text-align:center;">Loading from ClickUp…</div>';
+  try {
+    var raw = await window.cowork.callMcpTool(
+      'mcp__eca2358f-3429-4b64-8c0e-a83e2408a623__clickup_filter_tasks',
+      { space_ids: ['901511100496'] }
+    );
+    var data;
+    try {
+      var parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      if (parsed && parsed.content && parsed.content[0] && parsed.content[0].text) {
+        parsed = JSON.parse(parsed.content[0].text);
+      }
+      data = parsed;
+    } catch(e2) { data = raw; }
+
+    var tasks = (data && data.tasks) ? data.tasks : [];
+    if (!tasks.length) {
+      container.innerHTML = '<div style="font-size:12px;color:#6B7280;padding:8px;">No tasks found</div>';
+      return;
+    }
+
+    function statusPill(s) {
+      s = (s || '').toLowerCase();
+      if (s === 'in progress') return '<span class="pill p-progress">In Progress</span>';
+      if (s === 'done' || s === 'complete') return '<span class="pill p-done">Done</span>';
+      if (s === 'blocked') return '<span class="pill p-blocked">Blocked</span>';
+      var label = s.charAt(0).toUpperCase() + s.slice(1);
+      return '<span class="pill p-gray">' + label + '</span>';
+    }
+
+    var epics   = tasks.filter(function(t){ return t.list && t.list.name === 'Epics [PM]'; });
+    var backlog = tasks.filter(function(t){ return t.list && t.list.name === 'Backlog [DEV]'; });
+
+    var out = '';
+
+    if (epics.length) {
+      out += '<div class="ws-group" style="margin-top:0;margin-bottom:6px;">Epics</div>';
+      epics.forEach(function(t) {
+        var names = (t.assignees||[]).map(function(a){ return a.username.split(' ')[0]; }).join(', ');
+        out += '<div class="wsc" style="cursor:pointer;" onclick="window.open(\'' + t.url + '\',\'_blank\')" title="Open in ClickUp">';
+        out += '<div class="wsc-name">' + esc(t.name) + '</div>';
+        out += '<div class="wsc-meta">' + statusPill(t.status) + '</div>';
+        if (names) out += '<div class="wsc-sub">' + esc(names) + '</div>';
+        out += '</div>';
+      });
+    }
+
+    if (backlog.length) {
+      out += '<div class="ws-group" style="margin-top:10px;margin-bottom:6px;">Backlog [DEV]</div>';
+      var sorted = backlog.slice().sort(function(a,b){
+        var o = {'in progress':0,'to do':1,'not started':2,'done':3};
+        return (o[a.status]||2) - (o[b.status]||2);
+      });
+      sorted.forEach(function(t) {
+        var names = (t.assignees||[]).map(function(a){ return a.username.split(' ')[0]; }).join(', ');
+        out += '<div class="wsc" style="cursor:pointer;" onclick="window.open(\'' + t.url + '\',\'_blank\')" title="Open in ClickUp">';
+        out += '<div class="wsc-name">' + esc(t.name) + '</div>';
+        out += '<div class="wsc-meta">' + statusPill(t.status) + '</div>';
+        if (names) out += '<div class="wsc-sub">' + esc(names) + '</div>';
+        out += '</div>';
+      });
+    }
+
+    container.innerHTML = out || '<div style="font-size:12px;color:#6B7280;padding:8px;">No tasks found</div>';
+  } catch(e) {
+    container.innerHTML = '<div style="font-size:12px;color:#6B7280;padding:8px;">Could not load: ' + esc(String(e.message||e)) + '</div>';
+  }
+}
+
+// ── CLIENT ROADMAP ──
+function buildClientRoadmap() {
+  var el = document.getElementById('rm-client-chart');
+  if (!el) return;
+
+  var START = new Date('2026-05-18');
+  var TOTAL = 105;
+  var LABEL_W = 130;
+  var ROW_H = 28;
+  var LANE_PAD = 12;
+  var HDR_H = 44;
+
+  function d(s) {
+    var p = s.split('-');
+    var dt = new Date(parseInt(p[0]), parseInt(p[1])-1, parseInt(p[2]));
+    var base = new Date(2026, 4, 18); // May 18 local time
+    return Math.round((dt - base) / 86400000);
+  }
+  function pct(day) { return (Math.max(0,Math.min(TOTAL,day))/TOTAL*100).toFixed(3)+'%'; }
+  function wPct(s,e) { return (Math.max(0,e-s)/TOTAL*100).toFixed(3)+'%'; }
+  var todayDay = Math.round((new Date() - START) / 86400000);
+
+  var months = [
+    {label:'May', s:d('2026-05-18'), e:d('2026-06-01')},
+    {label:'June', s:d('2026-06-01'), e:d('2026-07-01')},
+    {label:'July', s:d('2026-07-01'), e:d('2026-08-01')},
+    {label:'August', s:d('2026-08-01'), e:TOTAL}
+  ];
+
+  var weeks = [];
+  for (var day=0; day<=TOTAL; day+=7) {
+    var dt = new Date(START); dt.setDate(dt.getDate()+day);
+    weeks.push({day:day, num:dt.getDate()});
+  }
+
+  var lanes = [
+    {
+      title:'Development', sub:'Phases 1 — 3', color:'#2563EB',
+      bars:[
+        {label:'Phase 0', s:7, e:21, style:'background:#4B5563;color:#E5E7EB;', row:0},
+        {label:'Paused', s:21, e:28, style:'background:repeating-linear-gradient(135deg,#F3F4F6 0px,#F3F4F6 5px,#E5E7EB 5px,#E5E7EB 10px);color:#6B7280;', row:0},
+        {label:'Phase 1', s:28, e:56, style:'background:#2563EB;color:#fff;', row:0},
+        {label:'Phase 2', s:56, e:84, style:'background:#2563EB;color:#fff;opacity:0.75;', row:0},
+        {label:'Pre-launch', s:84, e:98, style:'background:#2563EB;color:#fff;opacity:0.5;', row:0}
+      ]
+    },
+    {
+      title:'Client', sub:'Amazon', color:'#059669',
+      bars:[
+        {label:'Pilot agreement', s:7, e:42, style:'background:#059669;color:#fff;', row:0},
+        {label:'Marketing shares', s:28, e:42, style:'background:#FEFCE8;border:1.5px solid #FACC15;color:#713F12;', row:1},
+        {label:'Feedback & review', s:28, e:49, style:'background:#FEFCE8;border:1.5px solid #FACC15;color:#713F12;', row:2},
+        {label:'NYC', s:98, e:105, style:'background:#059669;color:#fff;', row:3}
+      ]
+    }
+  ];
+
+  var totalH = 0;
+  for (var i=0;i<lanes.length;i++) {
+    var maxRow = 0;
+    for (var j=0;j<lanes[i].bars.length;j++) if(lanes[i].bars[j].row>maxRow) maxRow=lanes[i].bars[j].row;
+    totalH += (maxRow+1)*(ROW_H+5)-5+LANE_PAD*2+8;
+  }
+
+  var out = '<div style="position:relative;padding-top:'+HDR_H+'px;width:100%;">';
+
+  // Month row
+  out += '<div style="position:absolute;top:0;left:'+LABEL_W+'px;right:0;height:20px;background:#F9FAFB;border-bottom:1px solid var(--border);">';
+  months.forEach(function(m){
+    if(Math.min(m.e,TOTAL)-m.s<=0) return;
+    out += '<div style="position:absolute;left:'+pct(m.s)+';width:'+wPct(m.s,Math.min(m.e,TOTAL))+';height:20px;display:flex;align-items:center;padding-left:6px;font-size:11px;font-weight:700;color:var(--text-muted);border-left:1px solid var(--border);box-sizing:border-box;">'+m.label+'</div>';
+  });
+  out += '</div>';
+
+  // Week row
+  out += '<div style="position:absolute;top:20px;left:'+LABEL_W+'px;right:0;height:24px;border-bottom:2px solid #D1D5DB;background:#fff;">';
+  weeks.forEach(function(w){
+    out += '<div style="position:absolute;left:'+pct(w.day)+';top:0;bottom:0;border-left:1px solid #E5E7EB;padding-left:3px;font-size:9px;color:var(--text-muted);display:flex;align-items:center;">'+w.num+'</div>';
+  });
+  out += '</div>';
+
+  // Pilot line
+  out += '<div style="position:absolute;top:44px;left:'+LABEL_W+'px;right:0;height:'+totalH+'px;pointer-events:none;">';
+  out += '<div style="position:absolute;left:'+pct(d('2026-08-28'))+';top:2px;bottom:0;border-left:2px dashed #9CA3AF;z-index:4;"><span style="position:absolute;top:2px;left:4px;font-size:9px;font-weight:600;color:#9CA3AF;white-space:nowrap;">→ 28 Aug</span></div>';
+  // Today
+  if(todayDay>=0&&todayDay<=TOTAL) {
+    out += '<div style="position:absolute;left:'+pct(todayDay)+';top:-22px;bottom:0;border-left:2px solid #EF4444;z-index:5;"><span style="position:absolute;top:0;left:4px;font-size:9px;font-weight:700;color:#EF4444;white-space:nowrap;background:#fff;padding:0 2px;">Today</span></div>';
+  }
+  out += '</div>';
+
+  // Lanes
+  lanes.forEach(function(lane){
+    var maxRow=0;
+    lane.bars.forEach(function(b){ if(b.row>maxRow) maxRow=b.row; });
+    var laneH=(maxRow+1)*(ROW_H+5)-5+LANE_PAD*2;
+    out += '<div style="display:flex;align-items:flex-start;margin-bottom:6px;">';
+    out += '<div style="width:'+LABEL_W+'px;flex-shrink:0;padding:'+LANE_PAD+'px 10px '+LANE_PAD+'px 8px;border-left:3px solid '+lane.color+';">';
+    out += '<div style="font-size:13px;font-weight:700;color:'+lane.color+';">'+lane.title+'</div>';
+    out += '<div style="font-size:11px;color:var(--text-muted);margin-top:1px;">'+lane.sub+'</div>';
+    out += '</div>';
+    out += '<div style="flex:1;position:relative;height:'+laneH+'px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);">';
+    // week grid
+    weeks.forEach(function(w){ out += '<div style="position:absolute;left:'+pct(w.day)+';top:0;bottom:0;width:1px;background:#E9EAEC;"></div>'; });
+    lane.bars.forEach(function(b){
+      var top = LANE_PAD + b.row*(ROW_H+5);
+      out += '<div onmouseenter="showRmTip(event,\''+b.label+'\')" onmouseleave="hideRmTip()" style="position:absolute;left:'+pct(b.s)+';width:'+wPct(b.s,b.e)+';top:'+top+'px;height:'+ROW_H+'px;'+b.style+';border-radius:5px;display:flex;align-items:center;padding:0 8px;font-size:11px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:2;min-width:4px;box-sizing:border-box;">'+b.label+'</div>';
+    });
+    out += '</div></div>';
+  });
+
+  out += '</div>';
+  el.innerHTML = out;
+}
+
+function buildClientRoadmapForWip(){var d=document.getElementById('rm-chart-clientwip');if(!d||d.innerHTML.trim())return;buildClientRoadmap();var s=document.getElementById('rm-client-chart');if(s)d.innerHTML=s.innerHTML;}
+
+// ── ROADMAP SNAPSHOTS ──
+var rmSnapshots = [];
+
+function saveRoadmapSnapshot() {
+  var chart = document.getElementById('rm-chart');
+  if (!chart || !chart.innerHTML) { alert('Roadmap not built yet — try switching to the Internal tab first.'); return; }
+  var now = new Date();
+  var label = now.getDate() + ' ' + now.toLocaleString('en-GB', {month:'short'});
+  var idx = rmSnapshots.length + 1;
+  var id = 'rmsnap_' + Date.now();
+  rmSnapshots.push({id:id, label:'v'+idx+' · '+label, html:chart.innerHTML});
+
+  // Add tab
+  var tabBar = document.getElementById('rm-snapshot-tabs');
+  var tab = document.createElement('div');
+  tab.className = 'rm-tab';
+  tab.id = 'rmtab-'+id;
+  tab.textContent = 'v'+idx+' · '+label;
+  tab.setAttribute('onclick', "switchRmTab('"+id+"',this)");
+  tabBar.appendChild(tab);
+
+  // Add pane
+  var paneContainer = document.getElementById('rm-snapshot-panes');
+  var pane = document.createElement('div');
+  pane.id = 'rm-sub-'+id;
+  pane.style.display = 'none';
+  pane.innerHTML = '<div class="card"><div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">Internal Roadmap snapshot · '+label+'<span style="font-size:11px;font-weight:400;color:var(--text-muted);">Read-only record</span></div><div style="overflow-x:auto;"><div style="min-width:1300px;padding-bottom:8px;">'+chart.innerHTML+'</div></div></div>';
+  paneContainer.appendChild(pane);
+}
+
+// ── ROADMAP SUB-TABS ──
+function switchRmTab(id, el) {
+  // Hide all sub-panes
+  document.getElementById('rm-sub-internal').style.display = 'none';
+  document.getElementById('rm-sub-clientview').style.display = 'none';
+  // Hide all snapshot panes
+  rmSnapshots.forEach(function(s){ var p=document.getElementById('rm-sub-'+s.id); if(p) p.style.display='none'; });
+  // Show target
+  var target = document.getElementById('rm-sub-'+id);
+  if (target) target.style.display = '';
+  else if (id === 'internal') document.getElementById('rm-sub-internal').style.display = '';
+  else if (id === 'clientview') document.getElementById('rm-sub-clientview').style.display = '';
+  // Update tab active state
+  document.querySelectorAll('.rm-tab').forEach(function(t){ t.classList.remove('rm-active'); });
+  if (el) el.classList.add('rm-active');
+}
+
+// ── INIT ──
+// ── ROADMAP TOOLTIP ──
+(function() {
+  const tip = document.createElement('div');
+  tip.id = 'rm-tip';
+  tip.style.cssText = 'position:fixed;background:#111827;color:#fff;font-size:12px;padding:5px 10px;border-radius:5px;pointer-events:none;display:none;z-index:9999;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.25);';
+  document.body.appendChild(tip);
+  document.addEventListener('mousemove', e => {
+    if (tip.style.display !== 'none') {
+      tip.style.left = (e.clientX + 14) + 'px';
+      tip.style.top  = (e.clientY - 36) + 'px';
+    }
+  });
+})();
+function showRmTip(e, text) {
+  const t = document.getElementById('rm-tip');
+  if (!t) return;
+  t.textContent = text;
+  t.style.display = 'block';
+  t.style.left = (e.clientX + 14) + 'px';
+  t.style.top  = (e.clientY - 36) + 'px';
+}
+function hideRmTip() {
+  const t = document.getElementById('rm-tip');
+  if (t) t.style.display = 'none';
+}
+
+updateCountdowns();
+buildRoadmap();
+loadDevTasks();
+loadChecks();
+loadSlack();
+</script>
+</body>
+</html>
