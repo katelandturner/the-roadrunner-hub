@@ -1064,6 +1064,7 @@ function switchTab(id, el) {
   document.getElementById('pane-' + id).classList.add('active');
   el.classList.add('active');
   if (id === 'client') { setTimeout(function(){ buildClientRoadmapForWip(); }, 50); }
+  if (id === 'clientview') { setTimeout(function(){ buildClientRoadmap(); }, 50); }
 }
 
 // ── COUNTDOWNS ──
@@ -1314,16 +1315,17 @@ function buildRoadmap() {
     client: 'background:#059669;color:#fff;',
     risk:   'background:#FEFCE8;border:2px solid #FACC15;color:#713F12;',
     past:   'background:#4B5563;color:#e5e7eb;',
+    pause:  'background:repeating-linear-gradient(135deg,#F3F4F6 0px,#F3F4F6 5px,#E5E7EB 5px,#E5E7EB 10px);color:#6B7280;border:1px solid #D1D5DB;',
   };
   const LANE_COLORS = { Dev:'#2563EB', Production:'#D97706', Design:'#7C3AED', Client:'#059669' };
 
   const lanes = [
     { title:'Dev', sub:'Sofia', rows:2, bars:[
-      // Phase 0 = past two weeks (May 18 → Jun 1)
-      { label:'Phase 0 · Onboarding',        s:d('2026-05-18'), e:d('2026-06-01'), row:0, cls:'dev', forcePast:true },
-      { label:'Phase 1 · Foundations (4 weeks)',  s:d('2026-06-01'), e:d('2026-06-29'), row:0, cls:'dev' },
-      { label:'Phase 2 · Feature Dev (4 weeks)',  s:d('2026-06-29'), e:d('2026-07-27'), row:0, cls:'dev', op:0.75 },
-      { label:'Pre-launch (2.5 weeks)',            s:d('2026-07-27'), e:d('2026-08-13'), row:0, cls:'dev', op:0.55 },
+      { label:'Phase 0 · Onboarding',             s:d('2026-05-18'), e:d('2026-06-08'), row:0, cls:'dev', forcePast:true },
+      { label:'Paused',                            s:d('2026-06-08'), e:d('2026-06-15'), row:0, cls:'pause' },
+      { label:'Phase 1 · Foundations (4 weeks)',   s:d('2026-06-15'), e:d('2026-07-13'), row:0, cls:'dev' },
+      { label:'Phase 2 · Feature Dev (4 weeks)',   s:d('2026-07-13'), e:d('2026-08-10'), row:0, cls:'dev', op:0.75 },
+      { label:'Pre-launch',                        s:d('2026-08-10'), e:d('2026-08-24'), row:0, cls:'dev', op:0.55 },
       { label:'⚠ AE plugin build · timing TBC',   s:d('2026-06-15'), e:d('2026-07-15'), row:1, cls:'risk' },
     ]},
     { title:'Production', sub:'Guillaume · Muyiwa', rows:2, bars:[
@@ -1709,6 +1711,7 @@ function hideRmTip() {
 
 updateCountdowns();
 buildRoadmap();
+buildClientRoadmap();
 loadPersistedSnapshots();
 loadDevTasks();
 loadChecks();
