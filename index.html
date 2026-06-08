@@ -567,7 +567,7 @@ body { font-family: var(--font); background: #fff; color: var(--text); font-size
 
         
         <div style="display:flex;align-items:center;border-bottom:1px solid var(--border);margin-bottom:16px;">
-          <div class="rm-tab rm-active" id="rmtab-internal" onclick="switchRmTab('internal',this)">Internal</div>
+          <div class="rm-tab rm-active" id="rmtab-internal" onclick="switchRmTab('internal',this)">Current</div>
           <div id="rm-snapshot-tabs" style="display:flex;"></div>
           <div style="margin-left:auto;padding-right:4px;">
             <button onclick="saveRoadmapSnapshot()" style="font-size:11px;padding:3px 10px;border:1px solid var(--border);border-radius:5px;background:#F9FAFB;cursor:pointer;color:var(--text-muted);" title="Save a dated snapshot of the current Internal roadmap">📸 Save snapshot</button>
@@ -593,14 +593,6 @@ body { font-family: var(--font); background: #fff; color: var(--text); font-size
             </div>
           </div>
         </div>
-
-            <div style="display:flex;gap:16px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);flex-wrap:wrap;">
-              <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted);"><div style="width:14px;height:9px;background:#2563EB;border-radius:2px;opacity:0.5;"></div>Development</div>
-              <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted);"><div style="width:14px;height:9px;background:#059669;border-radius:2px;"></div>Client</div>
-              <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted);"><div style="width:14px;height:9px;background:#FEFCE8;border:2px solid #FACC15;border-radius:2px;"></div>TBC</div>
-              <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted);"><div style="width:18px;height:2px;border-top:2px dashed #DC2626;"></div>Pilot</div>
-            </div>
-          </div>
 
       <div class="pane" id="pane-workstreams">
         
@@ -1656,16 +1648,16 @@ function saveRoadmapSnapshot() {
 
 // ── ROADMAP SUB-TABS ──
 function switchRmTab(id, el) {
-  // Hide all sub-panes
-  document.getElementById('rm-sub-internal').style.display = 'none';
-  document.getElementById('rm-sub-clientview').style.display = 'none';
+  // Hide all sub-panes (guard against missing elements)
+  var si = document.getElementById('rm-sub-internal'); if (si) si.style.display = 'none';
+  var sc = document.getElementById('rm-sub-clientview'); if (sc) sc.style.display = 'none';
   // Hide all snapshot panes
   rmSnapshots.forEach(function(s){ var p=document.getElementById('rm-sub-'+s.id); if(p) p.style.display='none'; });
   // Show target
   var target = document.getElementById('rm-sub-'+id);
-  if (target) target.style.display = '';
-  else if (id === 'internal') document.getElementById('rm-sub-internal').style.display = '';
-  else if (id === 'clientview') document.getElementById('rm-sub-clientview').style.display = '';
+  if (target) { target.style.display = ''; }
+  else if (id === 'internal') { if (si) si.style.display = ''; }
+  else if (id === 'clientview') { if (sc) sc.style.display = ''; }
   // Update tab active state
   document.querySelectorAll('.rm-tab').forEach(function(t){ t.classList.remove('rm-active'); });
   if (el) el.classList.add('rm-active');
