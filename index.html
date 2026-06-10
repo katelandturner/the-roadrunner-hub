@@ -1387,51 +1387,68 @@ function buildRoadmap() {
 }
 
 // ── CLICKUP LIVE TASKS ──
+function promptClickUpToken() {
+  var existing = localStorage.getItem('rr_clickup_token') || '';
+  var t = prompt('Enter your ClickUp personal API token:\n(ClickUp → Settings → Apps → API Token)\n\nStored only in your browser — never in the code.', existing);
+  if (t && t.trim()) {
+    localStorage.setItem('rr_clickup_token', t.trim());
+    loadDevTasks();
+  }
+}
+
 async function loadDevTasks() {
   var container = document.getElementById('clickup-phase1-tasks');
   if (!container) return;
-  container.innerHTML = '<div style="font-size:12px;color:#6B7280;padding:10px;text-align:center;">Loading from ClickUp…</div>';
-  try {
-    var raw = await window.cowork.callMcpTool(
-      'mcp__eca2358f-3429-4b64-8c0e-a83e2408a623__clickup_filter_tasks',
-      { space_ids: ['901511100496'] }
-    );
-    var data;
-    try {
-      var parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
-      if (parsed && parsed.content && parsed.content[0] && parsed.content[0].text) {
-        parsed = JSON.parse(parsed.content[0].text);
-      }
-      data = parsed;
-    } catch(e2) { data = raw; }
 
-    var tasks = (data && data.tasks) ? data.tasks : [];
-    if (!tasks.length) {
-      container.innerHTML = '<div style="font-size:12px;color:#6B7280;padding:8px;">No tasks found</div>';
+  var token = localStorage.getItem('rr_clickup_token');
+  if (!token) {
+    container.innerHTML = '<div style="text-align:center;padding:16px 8px;">'
+      + '<div style="font-size:12px;color:#6B7280;margin-bottom:8px;">Connect ClickUp to see live tasks</div>'
+      + '<button onclick="promptClickUpToken()" style="font-size:11px;padding:5px 14px;background:#2563EB;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;">🔑 Connect ClickUp</button>'
+      + '</div>';
+    return;
+  }
+
+  container.innerHTML = '<div style="font-size:12px;color:#6B7280;padding:10px;text-align:center;">Loading from ClickUp…</div>';
+
+  try {
+    // Direct ClickUp REST API — list IDs from Roadrunner AI space
+    var [epicsRes, backlogRes] = await Promise.all([
+      fetch('https://api.clickup.com/api/v2/list/901523682302/task?include_closed=false', { headers: { Authorization: token } }),
+      fetch('https://api.clickup.com/api/v2/list/901523682298/task?include_closed=false', { headers: { Authorization: token } })
+    ]);
+
+    if (epicsRes.status === 401 || backlogRes.status === 401) {
+      localStorage.removeItem('rr_clickup_token');
+      container.innerHTML = '<div style="text-align:center;padding:12px 8px;">'
+        + '<div style="font-size:12px;color:#DC2626;margin-bottom:8px;">Token invalid or expired</div>'
+        + '<button onclick="promptClickUpToken()" style="font-size:11px;padding:5px 14px;background:#2563EB;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;">🔑 Re-connect ClickUp</button>'
+        + '</div>';
       return;
     }
+
+    var epicsData  = await epicsRes.json();
+    var backlogData = await backlogRes.json();
+    var epics  = epicsData.tasks  || [];
+    var backlog = backlogData.tasks || [];
 
     function statusPill(s) {
       s = (s || '').toLowerCase();
       if (s === 'in progress') return '<span class="pill p-progress">In Progress</span>';
       if (s === 'done' || s === 'complete') return '<span class="pill p-done">Done</span>';
       if (s === 'blocked') return '<span class="pill p-blocked">Blocked</span>';
-      var label = s.charAt(0).toUpperCase() + s.slice(1);
-      return '<span class="pill p-gray">' + label + '</span>';
+      return '<span class="pill p-gray">' + (s.charAt(0).toUpperCase() + s.slice(1)) + '</span>';
     }
-
-    var epics   = tasks.filter(function(t){ return t.list && t.list.name === 'Epics [PM]'; });
-    var backlog = tasks.filter(function(t){ return t.list && t.list.name === 'Backlog [DEV]'; });
 
     var out = '';
 
     if (epics.length) {
       out += '<div class="ws-group" style="margin-top:0;margin-bottom:6px;">Epics</div>';
       epics.forEach(function(t) {
-        var names = (t.assignees||[]).map(function(a){ return a.username.split(' ')[0]; }).join(', ');
+        var names = (t.assignees||[]).map(function(a){ return (a.username||a.email||'').split(' ')[0]; }).join(', ');
         out += '<div class="wsc" style="cursor:pointer;" onclick="window.open(\'' + t.url + '\',\'_blank\')" title="Open in ClickUp">';
         out += '<div class="wsc-name">' + esc(t.name) + '</div>';
-        out += '<div class="wsc-meta">' + statusPill(t.status) + '</div>';
+        out += '<div class="wsc-meta">' + statusPill(t.status && t.status.status ? t.status.status : t.status) + '</div>';
         if (names) out += '<div class="wsc-sub">' + esc(names) + '</div>';
         out += '</div>';
       });
@@ -1441,19 +1458,25 @@ async function loadDevTasks() {
       out += '<div class="ws-group" style="margin-top:10px;margin-bottom:6px;">Backlog [DEV]</div>';
       var sorted = backlog.slice().sort(function(a,b){
         var o = {'in progress':0,'to do':1,'not started':2,'done':3};
-        return (o[a.status]||2) - (o[b.status]||2);
+        var as = (a.status && a.status.status ? a.status.status : a.status||'').toLowerCase();
+        var bs = (b.status && b.status.status ? b.status.status : b.status||'').toLowerCase();
+        return (o[as]||2) - (o[bs]||2);
       });
       sorted.forEach(function(t) {
-        var names = (t.assignees||[]).map(function(a){ return a.username.split(' ')[0]; }).join(', ');
+        var names = (t.assignees||[]).map(function(a){ return (a.username||a.email||'').split(' ')[0]; }).join(', ');
         out += '<div class="wsc" style="cursor:pointer;" onclick="window.open(\'' + t.url + '\',\'_blank\')" title="Open in ClickUp">';
         out += '<div class="wsc-name">' + esc(t.name) + '</div>';
-        out += '<div class="wsc-meta">' + statusPill(t.status) + '</div>';
+        out += '<div class="wsc-meta">' + statusPill(t.status && t.status.status ? t.status.status : t.status) + '</div>';
         if (names) out += '<div class="wsc-sub">' + esc(names) + '</div>';
         out += '</div>';
       });
     }
 
-    container.innerHTML = out || '<div style="font-size:12px;color:#6B7280;padding:8px;">No tasks found</div>';
+    if (!out) out = '<div style="font-size:12px;color:#6B7280;padding:8px;">No open tasks found</div>';
+    // Add a small reset button at the bottom
+    out += '<div style="text-align:right;margin-top:6px;"><button onclick="promptClickUpToken()" style="font-size:10px;color:var(--text-muted);background:none;border:none;cursor:pointer;padding:2px 4px;">⚙ token</button></div>';
+    container.innerHTML = out;
+
   } catch(e) {
     container.innerHTML = '<div style="font-size:12px;color:#6B7280;padding:8px;">Could not load: ' + esc(String(e.message||e)) + '</div>';
   }
